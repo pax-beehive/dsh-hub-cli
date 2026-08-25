@@ -11,6 +11,31 @@ All four packages use one lockstep version and one Git tag.
 5. Verify npm `latest`, provenance, repository links, and a clean `npx` smoke
    test before announcing the release.
 
-Each npm package must configure this GitHub repository and
-`.github/workflows/publish.yml` as its trusted publisher before the first
-release from the new repository.
+## First-time npm trusted publisher setup
+
+Each package must trust the exact GitHub OIDC identity used by the release job:
+
+- repository: `pax-beehive/dsh-hub-cli`
+- workflow file: `publish.yml`
+- environment: `npm`
+- permission: publish
+
+Authenticate an npm maintainer with account-level 2FA, then use npm CLI
+`11.15.0` or later:
+
+```bash
+pnpm dlx npm@11.15.0 login --auth-type=web
+pnpm dlx npm@11.15.0 trust github @dsh-plugin-hub/schemas --repo pax-beehive/dsh-hub-cli --file publish.yml --env npm --allow-publish --yes
+pnpm dlx npm@11.15.0 trust github @dsh-plugin-hub/registry --repo pax-beehive/dsh-hub-cli --file publish.yml --env npm --allow-publish --yes
+pnpm dlx npm@11.15.0 trust github @dsh-plugin-hub/cli --repo pax-beehive/dsh-hub-cli --file publish.yml --env npm --allow-publish --yes
+pnpm dlx npm@11.15.0 trust github @dsh-plugin-hub/dsh-plugin --repo pax-beehive/dsh-hub-cli --file publish.yml --env npm --allow-publish --yes
+```
+
+The npm web flow may request another 2FA confirmation for a high-privilege
+operation. Use its five-minute skip window to configure all four packages, then
+verify every package with
+`pnpm dlx npm@11.15.0 trust list <package> --json`.
+
+If a tagged publish fails before any package is accepted, fix the trusted
+publisher configuration and rerun the failed GitHub Actions job. Keep the tag
+on the audited release commit instead of moving it.
