@@ -18,19 +18,28 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 10.33.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: RELEASE_TAG="${GITHUB_REF_NAME}" pnpm release:check
       - run: pnpm check
-      - run: pnpm --filter @dsh-plugin-hub/schemas publish --access public --provenance --no-git-checks
-      - run: pnpm --filter @dsh-plugin-hub/registry publish --access public --provenance --no-git-checks
-      - run: pnpm --filter @dsh-plugin-hub/cli publish --access public --provenance --no-git-checks
-      - run: pnpm --filter @dsh-plugin-hub/dsh-plugin publish --access public --provenance --no-git-checks
+      - name: Pack release artifacts
+        run: |
+          mkdir -p "${RUNNER_TEMP}/dsh-hub-packages"
+          pnpm --filter @dsh-plugin-hub/schemas pack --pack-destination "${RUNNER_TEMP}/dsh-hub-packages"
+          pnpm --filter @dsh-plugin-hub/registry pack --pack-destination "${RUNNER_TEMP}/dsh-hub-packages"
+          pnpm --filter @dsh-plugin-hub/cli pack --pack-destination "${RUNNER_TEMP}/dsh-hub-packages"
+          pnpm --filter @dsh-plugin-hub/dsh-plugin pack --pack-destination "${RUNNER_TEMP}/dsh-hub-packages"
+      - name: Publish with npm OIDC
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          npm publish "${RUNNER_TEMP}/dsh-hub-packages/dsh-plugin-hub-schemas-${version}.tgz" --access public --provenance
+          npm publish "${RUNNER_TEMP}/dsh-hub-packages/dsh-plugin-hub-registry-${version}.tgz" --access public --provenance
+          npm publish "${RUNNER_TEMP}/dsh-hub-packages/dsh-plugin-hub-cli-${version}.tgz" --access public --provenance
+          npm publish "${RUNNER_TEMP}/dsh-hub-packages/dsh-plugin-hub-dsh-plugin-${version}.tgz" --access public --provenance
