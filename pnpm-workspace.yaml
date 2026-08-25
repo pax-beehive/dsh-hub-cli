@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+
+catalog:
+  '@types/node': 22.19.19
+  '@types/semver': 7.8.0
+  semver: 7.8.5
+  typescript: 5.9.3
+  zod: 4.4.3

@@ -1,0 +1,27 @@
+{
+  "name": "dsh-hub-cli-workspace",
+  "version": "0.1.4",
+  "private": true,
+  "description": "Open-source CLI, schemas, resolver, and DSH agent tools for DSH Plugin Hub",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @dsh-plugin-hub/schemas build && pnpm --filter @dsh-plugin-hub/registry build && pnpm --filter @dsh-plugin-hub/cli build",
+    "typecheck": "pnpm build && pnpm --filter @dsh-plugin-hub/schemas typecheck && pnpm --filter @dsh-plugin-hub/registry typecheck && pnpm --filter @dsh-plugin-hub/cli typecheck",
+    "test": "pnpm build && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs",
+    "pack:check": "node scripts/verify-package-contents.mjs",
+    "release:check": "node scripts/verify-release-version.mjs",
+    "check": "pnpm typecheck && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs && pnpm pack:check"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "@types/semver": "7.8.0",
+    "semver": "7.8.5",
+    "typescript": "5.9.3",
+    "zod": "4.4.3"
+  },
+  "type": "module",
+  "license": "MIT"
+}

@@ -1,0 +1,3 @@
+- insert:
+    - id: dsh-plugin-hub-tools
+      name: '@dsh-plugin-hub/dsh-plugin'

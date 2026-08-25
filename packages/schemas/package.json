@@ -1,0 +1,41 @@
+{
+  "name": "@dsh-plugin-hub/schemas",
+  "version": "0.1.4",
+  "description": "Portable DSH bundle, profile, and Hub API schemas",
+  "keywords": ["dsh-plugin", "deepseek-harness", "profile", "schema", "zod"],
+  "homepage": "https://dshpluginhub.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pax-beehive/dsh-hub-cli.git",
+    "directory": "packages/schemas"
+  },
+  "bugs": {
+    "url": "https://github.com/pax-beehive/dsh-hub-cli/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "license": "MIT"
+}

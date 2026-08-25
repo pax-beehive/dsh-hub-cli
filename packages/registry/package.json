@@ -1,0 +1,43 @@
+{
+  "name": "@dsh-plugin-hub/registry",
+  "version": "0.1.4",
+  "description": "Version resolution and profile planning for DSH Hub",
+  "keywords": ["dsh-plugin", "deepseek-harness", "profile", "resolver", "registry"],
+  "homepage": "https://dshpluginhub.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pax-beehive/dsh-hub-cli.git",
+    "directory": "packages/registry"
+  },
+  "bugs": {
+    "url": "https://github.com/pax-beehive/dsh-hub-cli/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@dsh-plugin-hub/schemas": "workspace:*",
+    "semver": "catalog:"
+  },
+  "devDependencies": {
+    "@types/semver": "catalog:",
+    "typescript": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "license": "MIT"
+}

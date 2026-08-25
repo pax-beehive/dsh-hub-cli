@@ -1,0 +1,49 @@
+{
+  "name": "@dsh-plugin-hub/cli",
+  "version": "0.1.4",
+  "description": "Create, search, install, and apply versioned DeepSeek Harness plugins and profiles",
+  "keywords": ["dsh-plugin", "deepseek-harness", "profile", "cli", "rollback"],
+  "homepage": "https://dshpluginhub.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pax-beehive/dsh-hub-cli.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/pax-beehive/dsh-hub-cli/issues"
+  },
+  "type": "module",
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "dsh-hub": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./bin": "./dist/bin.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@dsh-plugin-hub/registry": "workspace:*",
+    "@dsh-plugin-hub/schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "license": "MIT"
+}
