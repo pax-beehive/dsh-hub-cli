@@ -38,6 +38,10 @@ To expose the plan/apply workflow as DSH agent tools:
 dsh plugin --profile web add @dsh-plugin-hub/dsh-plugin
 ```
 
+The repository also includes a reviewable
+[`dsh-hub` agent Skill](skills/dsh-hub/SKILL.md) that requires an explicit,
+expiring operation plan before an agent applies a Profile mutation.
+
 ## Development
 
 ```bash
