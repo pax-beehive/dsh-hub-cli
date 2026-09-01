@@ -27,7 +27,7 @@ export class HubApiClient {
         accept: "application/json",
         "content-type": "application/json",
         authorization: `Bearer ${token}`,
-        "user-agent": "dsh-hub-cli/0.1",
+        "user-agent": "dsh-hub-cli/0.2.0",
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(30_000),
@@ -46,7 +46,7 @@ export class HubApiClient {
 
   private async get(path: string): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}${path}`, {
-      headers: { accept: "application/json", "user-agent": "dsh-hub-cli/0.1" },
+      headers: { accept: "application/json", "user-agent": "dsh-hub-cli/0.2.0" },
       signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) {

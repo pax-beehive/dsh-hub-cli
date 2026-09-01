@@ -180,7 +180,7 @@ export async function resolvePinnedGitHubBuildAllowlist(bundles: ResolvedProfile
     const prepareKey = bundle.packageName;
     const response = await fetch(
       `https://raw.githubusercontent.com/${owner}/${repository}/${commit}/pnpm-workspace.yaml`,
-      { headers: { accept: "text/plain", "user-agent": "dsh-hub-cli/0.1" }, signal: AbortSignal.timeout(15_000) },
+      { headers: { accept: "text/plain", "user-agent": "dsh-hub-cli/0.2.0" }, signal: AbortSignal.timeout(15_000) },
     );
     if (response.status === 404) return [prepareKey];
     if (!response.ok) throw new Error(`Unable to read pinned GitHub build policy (${response.status}) for ${bundle.packageName}`);

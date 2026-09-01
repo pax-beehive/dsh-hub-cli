@@ -24,10 +24,26 @@ import { validatePackageDirectory } from "../src/package-validation.ts";
 import { HubApiClient } from "../src/api-client.ts";
 import {
   applyOperationPlan,
+  createPluginInstallPlan,
   createProfileApplyPlan,
   createProfileRollbackPlan,
   createProfileSharePlan,
 } from "../dist/operations.js";
+import {
+  diffResolvedProfile,
+  doctorProfile,
+} from "../dist/profile-lifecycle.js";
+import {
+  buildCliUsagePayload,
+  cliErrorCode,
+  initializeTelemetry,
+  readTelemetryStatus,
+  sendCliUsage,
+  setTelemetryPreference,
+  telemetryEndpoint,
+  telemetryEnabled,
+  telemetryNotice,
+} from "../dist/telemetry.js";
 import { readProfileArchive, verifyProfileRelease } from "../dist/profile-archive.js";
 
 test("creates a complete schema-valid plugin starter without overwriting files", async () => {
@@ -348,6 +364,179 @@ test("operation plans are persisted, preconditioned and single-use", async () =>
   assert.equal(result.plan.status, "applied");
   assert.deepEqual(events, ["operation.started", "operation.completed"]);
   await assert.rejects(applyOperationPlan({ id: plan.id, dshHome: root }), /applied/);
+});
+
+test("Plugin install plans pin the exact source and carry its security assessment", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dsh-hub-plugin-plan-"));
+  const profile = join(root, "profiles", "web");
+  await mkdir(profile, { recursive: true });
+  await writeFile(join(profile, "package.json"), JSON.stringify({ name: "web" }), "utf8");
+  await writeFile(join(profile, "cordis.patch.yml"), "[]\n", "utf8");
+  const plugin = {
+    packageName: "dsh-memory",
+    security: {
+      status: "passed", version: "1.2.3", scannerVersion: "1",
+      integrityVerified: true, staticAnalyzed: true, capabilityAnalyzed: true,
+      dependencyInventoryComplete: true, advisoryScanned: true, behaviorAnalyzed: false,
+      capabilities: {
+        cordisModules: [], cordisServices: [], clientPackages: [], environmentVariables: [], networkHosts: [],
+        dynamicConfig: false, executablePatch: false, filesystemAccess: false, shellExecution: false,
+        registersModelTools: false, sessionAccess: false,
+      },
+      updatedAt: "2026-08-30T00:00:00.000Z",
+    },
+  } as never;
+  const plan = await createPluginInstallPlan({
+    profile: "web", plugin, version: "1.2.3", installSpec: "dsh-memory@1.2.3", dshHome: root,
+  });
+  assert.equal(plan.kind, "plugin.install");
+  assert.equal(plan.input.installSpec, "dsh-memory@1.2.3");
+  assert.equal(plan.input.security?.integrityVerified, true);
+  let installed = "";
+  await applyOperationPlan({
+    id: plan.id,
+    dshHome: root,
+    installPlugin: async (input) => { installed = input.installSpec; },
+  });
+  assert.equal(installed, "dsh-memory@1.2.3");
+});
+
+test("Profile diff reports additions, removals, updates, and immutable source changes", () => {
+  const diff = diffResolvedProfile({
+    profile: "web",
+    slug: "research",
+    release: {
+      schemaVersion: 1, version: "2.0.0", name: "Research", description: "", dsh: "*",
+      bundles: [], patch: [], inputs: [], publishedAt: "2026-08-30T00:00:00.000Z", contentHash: "sha256:new",
+    },
+    current: {
+      schemaVersion: 2, profile: "web", resolvedAt: "before", contentHash: "sha256:old",
+      hubProfile: { slug: "research", version: "1.0.0" },
+      bundles: [
+        { packageName: "removed", selector: "1.0.0", version: "1.0.0", installSpec: "removed@1.0.0", sourceKind: "npm" },
+        { packageName: "updated", selector: "1.0.0", version: "1.0.0", installSpec: "updated@1.0.0", sourceKind: "npm" },
+        { packageName: "moved", selector: "1.0.0", version: "1.0.0", installSpec: "moved@1.0.0", sourceKind: "npm" },
+      ],
+    },
+    resolved: { profileVersion: "2.0.0", bundles: [
+      { packageName: "added", selector: "1.0.0", version: "1.0.0", installSpec: "added@1.0.0", sourceKind: "npm" },
+      { packageName: "updated", selector: "2.0.0", version: "2.0.0", installSpec: "updated@2.0.0", sourceKind: "npm" },
+      { packageName: "moved", selector: "1.0.0", version: "1.0.0", installSpec: "github:acme/moved#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", sourceKind: "github" },
+    ] },
+  });
+  assert.deepEqual(diff.summary, { added: 1, removed: 1, updated: 1, sourceChanged: 1, unchanged: 0 });
+  assert.equal(diff.order.changed, true);
+  assert.equal(diff.changed, true);
+});
+
+test("Profile doctor detects lock drift and missing installed bundles", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dsh-hub-doctor-"));
+  const profile = join(root, "profiles", "web");
+  await mkdir(profile, { recursive: true });
+  await mkdir(join(root, ".hub", "installations", "web"), { recursive: true });
+  await writeFile(join(profile, "package.json"), JSON.stringify({
+    dsh: { profile: { bundles: ["dsh-memory"] } },
+  }), "utf8");
+  await writeFile(join(root, ".hub", "installations", "web", "current.json"), JSON.stringify({
+    schemaVersion: 2, profile: "web", resolvedAt: "now",
+    bundles: [{ packageName: "dsh-memory", selector: "1.0.0", version: "1.0.0", installSpec: "dsh-memory@1.0.0", sourceKind: "npm" }],
+  }), "utf8");
+  const result = await doctorProfile({ profile: "web", dshHome: root });
+  assert.equal(result.healthy, false);
+  assert.ok(result.checks.some((check) => check.packageName === "dsh-memory" && check.status === "failed"));
+});
+
+test("CLI telemetry is anonymous, optional, and reduces errors to stable codes", async () => {
+  assert.equal(telemetryEnabled({ DSH_HUB_TELEMETRY: "0" }), false);
+  assert.equal(telemetryEnabled({ DO_NOT_TRACK: "1" }), false);
+  assert.equal(cliErrorCode(new Error("dsh command failed (exit 1)")), "dsh_command_failed");
+  let payload: Record<string, unknown> | undefined;
+  await sendCliUsage("https://hub.test/api/v1", {
+    event: "plugin.install", outcome: "succeeded", packageName: "dsh-memory", version: "1.2.3", durationMs: 42,
+  }, {
+    env: {},
+    fetchImpl: async (_url, init) => {
+      payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(null, { status: 204 });
+    },
+  });
+  assert.equal(payload?.packageName, "dsh-memory");
+  assert.equal(payload?.durationMs, 42);
+  assert.equal("profile" in (payload ?? {}), false);
+  assert.equal("path" in (payload ?? {}), false);
+});
+
+test("CLI telemetry notices before enabling and persists user control", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dsh-hub-telemetry-"));
+  assert.deepEqual(
+    await readTelemetryStatus({ dshHome: root, env: {} }),
+    {
+      enabled: false,
+      noticeShown: false,
+      source: "default-pending-notice",
+      configPath: join(root, ".hub", "telemetry.json"),
+    },
+  );
+  const notices: string[] = [];
+  const first = await initializeTelemetry({
+    dshHome: root,
+    env: {},
+    onNotice: (message) => notices.push(message),
+  });
+  assert.equal(first.enabled, false);
+  assert.deepEqual(notices, [telemetryNotice]);
+  const saved = JSON.parse(await readFile(join(root, ".hub", "telemetry.json"), "utf8"));
+  assert.equal(saved.enabled, true);
+
+  const second = await initializeTelemetry({ dshHome: root, env: {} });
+  assert.equal(second.enabled, true);
+  assert.equal(second.noticeShown, true);
+
+  const off = await setTelemetryPreference(false, { dshHome: root });
+  assert.equal(off.enabled, false);
+  assert.equal((await initializeTelemetry({ dshHome: root, env: {} })).enabled, false);
+  const environment = await readTelemetryStatus({ dshHome: root, env: { DO_NOT_TRACK: "1" } });
+  assert.equal(environment.enabled, false);
+  assert.equal(environment.noticeShown, true);
+  assert.equal(environment.source, "environment");
+});
+
+test("CLI telemetry debug reveals the bounded payload without delivery", async () => {
+  assert.equal(telemetryEndpoint("http://collector.example/api/v1"), undefined);
+  assert.equal(telemetryEndpoint("http://127.0.0.1:8787/api/v1"), "http://127.0.0.1:8787/api/v1/telemetry/cli");
+  assert.equal(telemetryEndpoint("https://hub.test/api/v1"), "https://hub.test/api/v1/telemetry/cli");
+  const built = buildCliUsagePayload({
+    event: "profile.apply",
+    outcome: "failed",
+    profileSlug: "research",
+    errorCode: "operation_failed",
+    durationMs: 90_000_000,
+  });
+  assert.equal(built.durationMs, 86_400_000);
+
+  let delivered = false;
+  let debug: { endpoint: string; payload: Record<string, unknown> } | undefined;
+  await sendCliUsage("https://hub.test/api/v1", {
+    event: "plugin.install",
+    outcome: "succeeded",
+    packageName: "dsh-memory",
+    version: "1.2.3",
+    durationMs: 42,
+  }, {
+    env: { DSH_HUB_TELEMETRY_DEBUG: "1" },
+    fetchImpl: async () => {
+      delivered = true;
+      return new Response(null, { status: 204 });
+    },
+    onDebug: (value) => {
+      debug = value as { endpoint: string; payload: Record<string, unknown> };
+    },
+  });
+  assert.equal(delivered, false);
+  assert.equal(debug?.endpoint, "https://hub.test/api/v1/telemetry/cli");
+  assert.equal(debug?.payload.packageName, "dsh-memory");
+  assert.equal("account" in (debug?.payload ?? {}), false);
+  assert.equal("machineId" in (debug?.payload ?? {}), false);
 });
 
 test("rollback uses the same preconditioned operation plan", async () => {

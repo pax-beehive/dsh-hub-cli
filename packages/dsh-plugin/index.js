@@ -33,6 +33,50 @@ const output = {
 
 export function apply(ctx) {
   ctx.tools.register(defineTool({
+    name: 'dsh_hub_search',
+    description: 'Search the live DSH Plugin Hub catalog by name, capability, or natural-language need. This is read-only.',
+    parameters: {
+      query: { type: 'string', required: true, description: 'Plugin name, capability, or task to search for.' },
+    },
+    output,
+    async execute(args, exec) {
+      const events = await run(['search', args.query, '--json'], exec.signal)
+      return events[0] ?? { items: [] }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dsh_hub_plugin_info',
+    description: 'Inspect one Plugin, its exact selected version, source, compatibility, and published security assessment. This is read-only.',
+    parameters: {
+      packageName: { type: 'string', required: true, description: 'Exact npm package name.' },
+      version: { type: 'string', description: 'Exact version, tag, or range (default latest).' },
+    },
+    output,
+    async execute(args, exec) {
+      const values = ['info', args.packageName, '--version', args.version ?? 'latest', '--json']
+      const events = await run(values, exec.signal)
+      return events[0] ?? {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dsh_hub_plugin_plan',
+    description: 'Create a non-mutating, exact and preconditioned plan to install one reviewed Plugin. Present the source, security assessment, target Profile, and exact version before applying it.',
+    parameters: {
+      packageName: { type: 'string', required: true, description: 'Exact npm package name.' },
+      profile: { type: 'string', description: 'Local target Profile name (default web).' },
+      version: { type: 'string', description: 'Exact version, tag, or range (default latest).' },
+    },
+    output,
+    async execute(args, exec) {
+      const values = ['install', args.packageName, '--profile', args.profile ?? 'web', '--version', args.version ?? 'latest', '--plan', '--json']
+      const events = await run(values, exec.signal)
+      return events[0] ?? {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
     name: 'dsh_hub_profile_plan',
     description: 'Create a non-mutating, exact and preconditioned plan to install or upgrade a public DSH Hub Profile. Present the plan to the user before applying it.',
     parameters: {
@@ -49,8 +93,62 @@ export function apply(ctx) {
   }))
 
   ctx.tools.register(defineTool({
+    name: 'dsh_hub_profile_diff',
+    description: 'Compare the current local Profile lock with a public Hub Release, including additions, removals, load-order changes, versions, and immutable sources. This is read-only.',
+    parameters: {
+      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      profile: { type: 'string', description: 'Local target Profile name (default web).' },
+      version: { type: 'string', description: 'Target Release version (default latest).' },
+    },
+    output,
+    async execute(args, exec) {
+      const values = ['profile', 'diff']
+      if (args.slug) values.push(args.slug)
+      values.push('--profile', args.profile ?? 'web', '--version', args.version ?? 'latest', '--json')
+      const events = await run(values, exec.signal)
+      return events[0] ?? {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dsh_hub_profile_upgrade_plan',
+    description: 'Create a reviewed plan to upgrade the installed Profile to a selected Hub Release. Returns an up-to-date result without creating a mutation when no change is needed.',
+    parameters: {
+      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      profile: { type: 'string', description: 'Local target Profile name (default web).' },
+      version: { type: 'string', description: 'Target Release version (default latest).' },
+    },
+    output,
+    async execute(args, exec) {
+      const values = ['profile', 'upgrade']
+      if (args.slug) values.push(args.slug)
+      values.push('--profile', args.profile ?? 'web', '--version', args.version ?? 'latest', '--plan', '--json')
+      const events = await run(values, exec.signal)
+      return events[0] ?? {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dsh_hub_profile_doctor',
+    description: 'Diagnose the local Profile directory, lockfile, bundle order, installed versions, required inputs, and drift from a Hub Release. This is read-only.',
+    parameters: {
+      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      profile: { type: 'string', description: 'Local Profile name (default web).' },
+      version: { type: 'string', description: 'Release used for drift and input checks (default latest).' },
+    },
+    output,
+    async execute(args, exec) {
+      const values = ['profile', 'doctor']
+      if (args.slug) values.push(args.slug)
+      values.push('--profile', args.profile ?? 'web', '--version', args.version ?? 'latest', '--json')
+      const events = await run(values, exec.signal)
+      return events[0] ?? {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
     name: 'dsh_hub_operation_apply',
-    description: 'Apply a previously reviewed DSH Hub install, share, or rollback plan. Set confirmed=true only after the user explicitly confirms that exact plan.',
+    description: 'Apply a previously reviewed DSH Hub Plugin or Profile mutation plan. Set confirmed=true only after the user explicitly confirms that exact plan.',
     parameters: {
       planId: { type: 'string', required: true, description: 'Plan UUID returned by any DSH Hub planning tool.' },
       confirmed: { type: 'boolean', required: true, description: 'Must reflect explicit user confirmation of this plan.' },

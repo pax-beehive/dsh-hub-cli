@@ -3,6 +3,9 @@
 The `dsh-hub` command-line client for discovering DSH plugins, sharing complete
 version-locked Profiles, applying them safely, and rolling back local revisions.
 
+Version `0.2.0` adds reviewable lifecycle plans, Profile diff/doctor/upgrade,
+recoverable history and rollback, and the telemetry controls documented below.
+
 - Website: [dshpluginhub.ai](https://dshpluginhub.ai)
 - Browse plugins: [dshpluginhub.ai/plugins](https://dshpluginhub.ai/plugins)
 - Explore Profiles: [dshpluginhub.ai/profiles](https://dshpluginhub.ai/profiles)
@@ -41,6 +44,36 @@ A Profile Release locks the DSH runtime, Plugin versions, sources, integrity,
 and user-confirmed sequence. Apply uses a staging Profile, validation, atomic
 switch, recoverable local revisions, and an auditable build-script allowlist
 derived from each pinned GitHub source.
+
+## Anonymous CLI telemetry
+
+On first run the CLI prints a notice, saves an enabled preference for later
+eligible commands, and sends no event. You can turn telemetry off before the
+next run. Successful and failed Plugin install and Profile apply, upgrade,
+rollback, share, and doctor operations then send aggregate usage data to the
+Hub. Payloads contain the public package or Profile identifier and version,
+command outcome, a stable error category, duration, platform, architecture,
+and CLI version. They contain no account, machine ID, IP-address field, local
+path, Profile contents, configuration value, environment value, or secret. The
+API immediately folds events into daily aggregates and retains them for 365
+days. Hosting and security providers still process source IPs to deliver and
+protect HTTP requests; the API keeps only hour-rotating rate-limit HMAC keys for
+the current and previous hour.
+
+Control the persistent setting with:
+
+```bash
+dsh-hub telemetry state
+dsh-hub telemetry off
+dsh-hub telemetry on
+```
+
+`--no-telemetry`, `DSH_HUB_TELEMETRY=0`, and `DO_NOT_TRACK=1` disable one
+invocation without changing the saved preference. To inspect the complete next
+event without sending it, run the command with `DSH_HUB_TELEMETRY_DEBUG=1`.
+Normal delivery uses HTTPS in a detached process with a 1.5-second timeout and
+never changes the requested command's result. See the hosted
+[privacy notice](https://dshpluginhub.ai/privacy) for the complete disclosure.
 
 This is an independent community project and is not affiliated with or endorsed
 by DeepSeek.

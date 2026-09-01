@@ -7,15 +7,41 @@ description: Safely discover, review, install, upgrade, share, and roll back DSH
 
 Use the installed `dsh-hub` CLI as the sole local execution authority.
 
+## Discover and assess
+
+1. Search Plugins with `dsh-hub search <query> --json` or Profiles with
+   `dsh-hub profile search <query> --json`.
+2. Inspect a Plugin through `dsh-hub info <package> --version <selector>
+   --json`. Report the resolved exact version, source, DSH compatibility,
+   runtime surfaces, and security assessment.
+3. Before recommending a Profile change, run `dsh-hub profile doctor
+   [slug] --profile <name> --json` and `dsh-hub profile diff [slug]
+   --version <version> --profile <name> --json` when a remote target exists.
+
+## Install a Plugin
+
+1. Create a plan with `dsh-hub install <package> --version <selector>
+   --profile <name> --plan --json`.
+2. Present the exact install source and version, security assessment, target
+   Profile, and current-state precondition.
+3. Obtain explicit confirmation for that plan ID.
+4. Run `dsh-hub operation apply <plan-id> --json` and report the final event.
+
 ## Install or upgrade
 
-1. Inspect the public release with `dsh-hub profile apply <slug> --plan --json`.
+1. For first application, create the plan with `dsh-hub profile apply <slug>
+   --version <version> --profile <name> --plan --json`. For an existing
+   Profile, use `dsh-hub profile upgrade [slug] --version <version>
+   --profile <name> --plan --json` so the review includes a diff.
 2. Show the user the target Profile, exact Profile Release, ordered Plugins,
    exact Plugin versions, required local inputs, and current-state precondition.
 3. Obtain explicit confirmation for that plan ID.
 4. Run `dsh-hub operation apply <plan-id> --json`.
 5. Report the final NDJSON event. Never claim success before
    `operation.completed`.
+
+Run `dsh-hub profile doctor --profile <name> --json` after apply or upgrade and
+report any remaining local or remote drift.
 
 Plans expire after 30 minutes and fail if the target changed after planning.
 Create a fresh plan when either condition occurs.

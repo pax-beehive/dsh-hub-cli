@@ -5,6 +5,9 @@ import { join } from "node:path";
 
 const packages = ["schemas", "registry", "cli", "dsh-plugin"];
 const forbidden = /(^|\/)(\.env(?:\.|$)|node_modules|src|tests)(\/|$)/;
+const packageRequirements = {
+  cli: ["dist/bin.js", "dist/telemetry.js", "dist/telemetry-worker.js"],
+};
 const npmCache = mkdtempSync(join(tmpdir(), "dsh-hub-npm-cache-"));
 
 try {
@@ -21,6 +24,9 @@ try {
     const report = JSON.parse(result.stdout)[0];
     const files = report.files.map((entry) => entry.path);
     for (const required of ["package.json", "README.md", "LICENSE"]) {
+      if (!files.includes(required)) throw new Error(`${name} package is missing ${required}`);
+    }
+    for (const required of packageRequirements[name] ?? []) {
       if (!files.includes(required)) throw new Error(`${name} package is missing ${required}`);
     }
     const leaked = files.filter((path) => forbidden.test(path));

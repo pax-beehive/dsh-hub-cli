@@ -2,12 +2,14 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ResolvedProfile } from "@dsh-plugin-hub/registry";
-import type { HubProfileVersion, ProfileDraft } from "@dsh-plugin-hub/schemas";
+import type { HubProfileVersion, PluginRecord, ProfileDraft } from "@dsh-plugin-hub/schemas";
 import { HubApiClient } from "./api-client.js";
 import { getAccessToken } from "./auth.js";
 import {
   captureProfile,
+  buildDshInstallCommand,
   dshHomePath,
+  executeDshCommand,
   installResolvedProfile,
   listProfileRevisions,
   profileLockPath,
@@ -24,11 +26,32 @@ interface OperationBase {
   status: "planned" | "applied";
 }
 
-export interface ProfileApplyPlan extends OperationBase {
-  kind: "profile.apply";
+export interface PluginInstallPlan extends OperationBase {
+  kind: "plugin.install";
+  precondition: { localProfileHash?: string };
+  input: {
+    profile: string;
+    packageName: string;
+    version: string;
+    installSpec: string;
+    security?: PluginRecord["security"];
+  };
+}
+
+interface ProfileMutationPlanBase extends OperationBase {
   precondition: { currentContentHash?: string };
   input: { profile: string; slug: string; release: HubProfileVersion; resolved: ResolvedProfile };
 }
+
+export interface ProfileApplyOperationPlan extends ProfileMutationPlanBase {
+  kind: "profile.apply";
+}
+
+export interface ProfileUpgradePlan extends ProfileMutationPlanBase {
+  kind: "profile.upgrade";
+}
+
+export type ProfileApplyPlan = ProfileApplyOperationPlan | ProfileUpgradePlan;
 
 export interface ProfileRollbackPlan extends OperationBase {
   kind: "profile.rollback";
@@ -42,7 +65,7 @@ export interface ProfileSharePlan extends OperationBase {
   input: { profile: string; slug: string; version: string; apiBase: string; draft: ProfileDraft };
 }
 
-export type OperationPlan = ProfileApplyPlan | ProfileRollbackPlan | ProfileSharePlan;
+export type OperationPlan = PluginInstallPlan | ProfileApplyPlan | ProfileRollbackPlan | ProfileSharePlan;
 
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -71,6 +94,20 @@ async function currentState(profile: string, dshHome?: string): Promise<HubLockf
   }
 }
 
+async function localProfileHash(profile: string, dshHome?: string): Promise<string | undefined> {
+  const directory = join(dshHomePath(dshHome), "profiles", profile);
+  const parts: string[] = [];
+  for (const name of ["package.json", "cordis.patch.yml"]) {
+    try { parts.push(await readFile(join(directory, name), "utf8")); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      parts.push("");
+    }
+  }
+  if (parts.every((part) => part === "")) return undefined;
+  return `sha256:${createHash("sha256").update(parts.join("\x00")).digest("hex")}`;
+}
+
 function operationBase(): OperationBase {
   const created = new Date();
   return {
@@ -93,14 +130,38 @@ export async function createProfileApplyPlan(options: {
   slug: string;
   release: HubProfileVersion;
   resolved: ResolvedProfile;
+  kind?: "profile.apply" | "profile.upgrade";
   dshHome?: string;
 }): Promise<ProfileApplyPlan> {
   const current = await currentState(options.profile, options.dshHome);
   const plan: ProfileApplyPlan = {
     ...operationBase(),
-    kind: "profile.apply",
+    kind: options.kind ?? "profile.apply",
     precondition: { currentContentHash: current?.contentHash },
     input: { profile: options.profile, slug: options.slug, release: options.release, resolved: options.resolved },
+  };
+  await persistPlan(plan, options.dshHome);
+  return plan;
+}
+
+export async function createPluginInstallPlan(options: {
+  profile: string;
+  plugin: PluginRecord;
+  version: string;
+  installSpec: string;
+  dshHome?: string;
+}): Promise<PluginInstallPlan> {
+  const plan: PluginInstallPlan = {
+    ...operationBase(),
+    kind: "plugin.install",
+    precondition: { localProfileHash: await localProfileHash(options.profile, options.dshHome) },
+    input: {
+      profile: options.profile,
+      packageName: options.plugin.packageName,
+      version: options.version,
+      installSpec: options.installSpec,
+      security: options.plugin.security?.version === options.version ? options.plugin.security : undefined,
+    },
   };
   await persistPlan(plan, options.dshHome);
   return plan;
@@ -145,7 +206,7 @@ export async function createProfileSharePlan(options: {
 
 function assertPlan(plan: OperationPlan, id: string): void {
   if (plan.schemaVersion !== 1 || plan.id !== id ||
-      !["profile.apply", "profile.rollback", "profile.share"].includes(plan.kind)) {
+      !["plugin.install", "profile.apply", "profile.upgrade", "profile.rollback", "profile.share"].includes(plan.kind)) {
     throw new Error("Unsupported operation plan");
   }
   if (plan.status !== "planned") throw new Error(`Operation plan is ${plan.status}`);
@@ -159,6 +220,7 @@ export async function applyOperationPlan(options: {
   install?: typeof installResolvedProfile;
   rollback?: typeof rollbackProfile;
   share?: (input: ProfileSharePlan["input"]) => Promise<unknown>;
+  installPlugin?: (input: PluginInstallPlan["input"]) => Promise<void>;
 }): Promise<{ plan: OperationPlan; revision?: string; publication?: unknown }> {
   const path = planPath(options.id, options.dshHome);
   const lockPath = `${path}.lock`;
@@ -172,10 +234,30 @@ export async function applyOperationPlan(options: {
   try {
     const plan = JSON.parse(await readFile(path, "utf8")) as OperationPlan;
     assertPlan(plan, options.id);
-    options.progress?.({ type: "operation.started", planId: plan.id, operation: plan.kind });
+    options.progress?.({
+      type: "operation.started",
+      planId: plan.id,
+      operation: plan.kind,
+      packageName: plan.kind === "plugin.install" ? plan.input.packageName : undefined,
+      profileSlug: plan.kind === "profile.apply" || plan.kind === "profile.upgrade" || plan.kind === "profile.share" ? plan.input.slug :
+        plan.kind === "profile.rollback" ? plan.input.target.hubProfile?.slug : undefined,
+      version: plan.kind === "plugin.install" ? plan.input.version :
+        plan.kind === "profile.apply" || plan.kind === "profile.upgrade" ? plan.input.release.version :
+          plan.kind === "profile.share" ? plan.input.version : plan.input.target.hubProfile?.version,
+    });
     let revision: string | undefined;
     let publication: unknown;
-    if (plan.kind === "profile.apply") {
+    if (plan.kind === "plugin.install") {
+      if (await localProfileHash(plan.input.profile, options.dshHome) !== plan.precondition.localProfileHash) {
+        throw new Error("Profile changed after planning; create a new plan");
+      }
+      if (options.installPlugin) {
+        await options.installPlugin(plan.input);
+      } else {
+        await executeDshCommand(buildDshInstallCommand(plan.input.profile, plan.input.installSpec));
+        await validateCurrentProfile(plan.input.profile);
+      }
+    } else if (plan.kind === "profile.apply" || plan.kind === "profile.upgrade") {
       const current = await currentState(plan.input.profile, options.dshHome);
       if (current?.contentHash !== plan.precondition.currentContentHash) {
         throw new Error("Profile changed after planning; create a new plan");
