@@ -20,7 +20,7 @@
     "@types/semver": "7.8.0",
     "semver": "7.8.5",
     "typescript": "5.9.3",
-    "zod": "4.4.3"
+    "zod": "4.5.2"
   },
   "type": "module",
   "license": "MIT"

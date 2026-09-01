@@ -19,8 +19,8 @@ catalogs:
       specifier: 5.9.3
       version: 5.9.3
     zod:
-      specifier: 4.4.3
-      version: 4.4.3
+      specifier: 4.5.2
+      version: 4.5.2
 
 importers:
 
@@ -90,7 +90,7 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 4.4.3
+        version: 4.5.2
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -246,6 +246,9 @@ packages:
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
+  zod@4.5.2:
+    resolution: {integrity: sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg==}
+
 snapshots:
 
   '@deepseek-ai/cordis@4.0.1':
@@ -372,3 +375,5 @@ snapshots:
   undici-types@6.21.0: {}
 
   zod@4.4.3: {}
+
+  zod@4.5.2: {}
