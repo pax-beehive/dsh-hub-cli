@@ -4,6 +4,8 @@
 
 # DSH Hub CLI
 
+**English** · [简体中文](README.zh-CN.md)
+
 **Share your entire DeepSeek Harness setup as one versioned, reproducible Profile.**
 
 Capture the plugins, order, runtime, and config you have running locally. Publish it as an immutable Release. Anyone can apply it with a single command, review every change before it lands, and roll back if they don't like it.
