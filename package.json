@@ -12,8 +12,9 @@
     "typecheck": "pnpm build && pnpm --filter @dsh-plugin-hub/schemas typecheck && pnpm --filter @dsh-plugin-hub/registry typecheck && pnpm --filter @dsh-plugin-hub/cli typecheck",
     "test": "pnpm build && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs",
     "pack:check": "node scripts/verify-package-contents.mjs",
+    "governance:check": "node scripts/verify-repository-governance.mjs",
     "release:check": "node scripts/verify-release-version.mjs",
-    "check": "pnpm typecheck && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs && pnpm pack:check"
+    "check": "pnpm typecheck && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs && pnpm pack:check && pnpm governance:check"
   },
   "devDependencies": {
     "@types/node": "catalog:",

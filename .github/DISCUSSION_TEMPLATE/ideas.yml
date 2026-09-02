@@ -1,0 +1,26 @@
+title: "[Idea] "
+labels:
+  - type:feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this category to explore ideas before opening an implementation Issue.
+
+        请先在此讨论想法，达成共识后再创建实施 Issue。
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem / 用户问题
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome / 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs and alternatives / 权衡与替代方案

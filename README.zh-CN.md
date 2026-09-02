@@ -21,7 +21,7 @@
 
 <sub>本仓库是 Hub 的开源客户端。网站、API 和注册表位于 <a href="https://dshpluginhub.ai">dshpluginhub.ai</a>。</sub>
 
-[快速开始](#快速开始) · [为什么需要可分享的-profile](#为什么需要可分享的-profile) · [工作原理](#工作原理) · [命令一览](#命令一览) · [Agent 工具](#在-agent-中使用) · [安全](#安全与隐私)
+[快速开始](#快速开始) · [为什么需要可分享的 Profile](#为什么需要可分享的-profile) · [命令一览](#命令一览) · [支持](SUPPORT.zh-CN.md) · [参与贡献](CONTRIBUTING.zh-CN.md) · [治理](GOVERNANCE.zh-CN.md) · [安全](SECURITY.zh-CN.md)
 
 </div>
 

@@ -21,7 +21,7 @@ Capture the plugins, order, runtime, and config you have running locally. Publis
 
 <sub>This repository is the open-source client for the Hub. The website, API, and registry live at <a href="https://dshpluginhub.ai">dshpluginhub.ai</a>.</sub>
 
-[Quick start](#quick-start) · [Why Profiles](#why-shareable-profiles) · [How it works](#how-it-works) · [Commands](#command-reference) · [Agent tools](#use-it-from-an-agent) · [Security](#security-and-privacy)
+[Quick start](#quick-start) · [Why Profiles](#why-shareable-profiles) · [Commands](#command-reference) · [Support](SUPPORT.md) · [Contributing](CONTRIBUTING.md) · [Governance](GOVERNANCE.md) · [Security](SECURITY.md)
 
 </div>
 

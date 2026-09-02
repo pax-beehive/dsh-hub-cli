@@ -1,0 +1,40 @@
+name: Documentation improvement / 文档改进
+description: Report missing, unclear, or incorrect documentation. / 报告缺失、模糊或错误的文档。
+title: "[Docs]: "
+labels:
+  - type:docs
+  - status:needs-triage
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Page or section / 页面或章节
+      description: Link to the file, npm page, or website documentation. / 请提供文件、npm 页面或官网文档链接。
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language / 语言
+      options:
+        - English
+        - 简体中文
+        - Both / 两者
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is unclear or incorrect? / 哪些内容不清楚或有误？
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement / 修改建议
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution / 参与贡献
+      options:
+        - label: I am willing to open a PR after the scope is confirmed. / 范围确认后，我愿意提交 PR。

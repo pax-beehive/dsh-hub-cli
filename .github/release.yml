@@ -1,0 +1,30 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+  categories:
+    - title: Breaking changes / 破坏性变更
+      labels:
+        - type:breaking
+    - title: Features / 新功能
+      labels:
+        - type:feature
+        - enhancement
+    - title: Fixes / 修复
+      labels:
+        - type:bug
+        - bug
+    - title: Security / 安全
+      labels:
+        - type:security
+    - title: Documentation / 文档
+      labels:
+        - type:docs
+        - documentation
+    - title: Dependencies / 依赖
+      labels:
+        - dependencies
+        - github_actions
+    - title: Other changes / 其他变更
+      labels:
+        - "*"

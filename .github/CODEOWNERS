@@ -1,0 +1,8 @@
+# Default reviewers for repository-wide changes.
+* @Zhang-JiahangH @qiz029 @CCGV2
+
+# Public contracts and release-critical automation require maintainer review.
+/packages/schemas/ @Zhang-JiahangH @qiz029 @CCGV2
+/.github/workflows/ @Zhang-JiahangH @qiz029 @CCGV2
+/scripts/ @Zhang-JiahangH @qiz029 @CCGV2
+/docs/releasing.md @Zhang-JiahangH @qiz029 @CCGV2

@@ -1,0 +1,59 @@
+name: Feature request / 功能建议
+description: Propose a user-facing improvement. / 提议一项面向用户的改进。
+title: "[Feature]: "
+labels:
+  - type:feature
+  - status:needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Large command, API, or schema changes start with an Issue or Discussion before implementation.
+
+        涉及命令、API 或 Schema 的较大变更，应先通过 Issue 或 Discussion 达成共识。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks / 提交前检查
+      options:
+        - label: I searched existing Issues and Discussions. / 我已搜索现有 Issue 和 Discussion。
+          required: true
+        - label: This request describes a user problem, not only a preferred implementation. / 此建议描述了用户问题，不只是一种实现偏好。
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem / 用户问题
+      description: Who is affected, and what are they trying to accomplish? / 哪类用户受到影响，他们想完成什么？
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome / 期望结果
+      description: Describe observable behavior and success criteria. / 描述可观察行为和成功标准。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach / 建议方案
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / 考虑过的替代方案
+  - type: checkboxes
+    id: surfaces
+    attributes:
+      label: Affected surfaces / 影响范围
+      options:
+        - label: CLI commands / CLI 命令
+        - label: Profile lifecycle / Profile 生命周期
+        - label: Registry or resolver / Registry 或解析器
+        - label: Public schemas or API contracts / 公共 Schema 或 API 契约
+        - label: DSH agent tools / DSH Agent 工具
+        - label: Documentation only / 仅文档
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and security considerations / 兼容性与安全考量

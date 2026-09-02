@@ -2,6 +2,12 @@
 
 All four `@dsh-plugin-hub/*` packages are released together under one version.
 
+## Unreleased
+
+- Add bilingual repository governance, support, security, contribution, and maintenance guidance.
+- Add structured Issue and Discussion forms, a pull request template, CODEOWNERS, automatic area labels, pull request policy checks, dependency review, and categorized GitHub Release Notes.
+- Validate required repository-governance files as part of `pnpm check`.
+
 ## 0.2.0
 
 - Reviewable, expiring operation plans for Plugin install and Profile apply,
