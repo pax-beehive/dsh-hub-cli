@@ -1,0 +1,32 @@
+title: "[Q&A] "
+labels:
+  - type:question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask setup and usage questions here. Remove secrets, tokens, local paths, and environment values before posting.
+
+        请在这里咨询安装与使用问题。发布前请删除密钥、Token、本地路径和环境变量值。
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do? / 你想完成什么？
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you tried? / 你已经尝试过什么？
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 环境
+      placeholder: CLI 0.2.0; Node.js 22.19.0; pnpm 10.33.0; macOS
+  - type: textarea
+    id: sanitized_output
+    attributes:
+      label: Sanitized output / 脱敏后的输出
+      render: shell

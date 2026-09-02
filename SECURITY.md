@@ -1,5 +1,7 @@
 # Security policy
 
+**English** · [简体中文](SECURITY.zh-CN.md)
+
 ## Supported versions
 
 Security fixes are released for the current npm `latest` version. Upgrade all

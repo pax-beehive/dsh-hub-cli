@@ -1,0 +1,25 @@
+area:cli:
+  - changed-files:
+      - any-glob-to-any-file: packages/cli/**
+
+area:agent:
+  - changed-files:
+      - any-glob-to-any-file: packages/dsh-plugin/**
+
+area:registry:
+  - changed-files:
+      - any-glob-to-any-file: packages/registry/**
+
+area:schemas:
+  - changed-files:
+      - any-glob-to-any-file: packages/schemas/**
+
+area:docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - docs/**
+
+area:github:
+  - changed-files:
+      - any-glob-to-any-file: .github/**

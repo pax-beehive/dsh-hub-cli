@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support / 使用问题与支持
+    url: https://github.com/pax-beehive/dsh-hub-cli/discussions/categories/q-a
+    about: Ask setup and usage questions in Discussions. / 请在 Discussions 中咨询安装与使用问题。
+  - name: Security vulnerability / 安全漏洞
+    url: https://github.com/pax-beehive/dsh-hub-cli/security/advisories/new
+    about: Report vulnerabilities privately. Do not open a public issue. / 请私下报告漏洞，不要创建公开 Issue。
+  - name: DSH Plugin Hub documentation / 文档中心
+    url: https://dshpluginhub.ai/docs
+    about: Read the product and CLI guides. / 查看产品与 CLI 使用指南。

@@ -1,0 +1,84 @@
+name: Bug report / 缺陷报告
+description: Report reproducible incorrect behavior. / 报告可复现的异常行为。
+title: "[Bug]: "
+labels:
+  - type:bug
+  - status:needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve DSH Hub CLI. Remove tokens, local paths, environment values, Profile secrets, and other sensitive information before submitting.
+
+        感谢你帮助改进 DSH Hub CLI。提交前请删除 Token、本地路径、环境变量值、Profile 密钥及其他敏感信息。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks / 提交前检查
+      options:
+        - label: I searched existing Issues and Discussions. / 我已搜索现有 Issue 和 Discussion。
+          required: true
+        - label: I removed sensitive data from logs and examples. / 我已从日志和示例中删除敏感数据。
+          required: true
+        - label: I can reproduce this with the current npm `latest` version. / 我可以在 npm `latest` 版本复现问题。
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: DSH Hub CLI version / CLI 版本
+      description: Run `dsh-hub --version`. / 运行 `dsh-hub --version`。
+      placeholder: 0.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating system / 操作系统
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other / 其他
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime versions / 运行时版本
+      description: Include Node.js, pnpm, and DSH versions. / 请提供 Node.js、pnpm 和 DSH 版本。
+      placeholder: Node.js 22.19.0; pnpm 10.33.0; DSH 4.2.1
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps / 复现步骤
+      description: Provide the smallest sequence that reproduces the issue. / 请提供能够复现问题的最短步骤。
+      placeholder: |
+        1. Run ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / 实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized output / 脱敏后的输出
+      description: Paste only output that has been checked for sensitive data. / 仅粘贴已经确认不含敏感数据的输出。
+      render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context / 补充信息

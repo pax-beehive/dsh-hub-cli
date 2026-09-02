@@ -1,0 +1,28 @@
+title: "[Show and tell] "
+labels:
+  - type:showcase
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a plugin, Profile, agent workflow, or reproducible setup built with DSH Hub CLI.
+
+        分享你通过 DSH Hub CLI 构建的插件、Profile、Agent 工作流或可复现配置。
+  - type: input
+    id: project
+    attributes:
+      label: Project or Profile / 项目或 Profile
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: What does it help with? / 它解决了什么问题？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can others try it? / 其他人如何体验？
+    validations:
+      required: true
