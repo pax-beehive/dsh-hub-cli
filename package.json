@@ -16,11 +16,11 @@
     "check": "pnpm typecheck && node --test packages/*/tests/*.test.ts packages/*/tests/*.test.mjs && pnpm pack:check"
   },
   "devDependencies": {
-    "@types/node": "22.19.19",
-    "@types/semver": "7.8.0",
-    "semver": "7.8.5",
-    "typescript": "5.9.3",
-    "zod": "4.4.3"
+    "@types/node": "catalog:",
+    "@types/semver": "catalog:",
+    "semver": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
   },
   "type": "module",
   "license": "MIT"
