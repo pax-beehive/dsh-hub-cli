@@ -4,6 +4,8 @@ All four `@dsh-plugin-hub/*` packages are released together under one version.
 
 ## Unreleased
 
+## 0.3.0
+
 - Add `dsh-hub sync <package>` for an immediate npm sync, so a version published seconds ago is indexed without waiting for the schedule.
 - Add bilingual repository governance, support, security, contribution, and maintenance guidance.
 - Add structured Issue and Discussion forms, a pull request template, CODEOWNERS, automatic area labels, pull request policy checks, dependency review, and categorized GitHub Release Notes.
