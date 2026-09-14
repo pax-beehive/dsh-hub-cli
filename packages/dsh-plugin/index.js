@@ -78,11 +78,11 @@ export function apply(ctx) {
 
   ctx.tools.register(defineTool({
     name: 'dsh_hub_profile_plan',
-    description: 'Create a non-mutating, exact and preconditioned plan to install or upgrade a public DSH Hub Profile. Present the plan to the user before applying it.',
+    description: 'Create a non-mutating, exact and preconditioned plan to install or upgrade a public DSH Hub Preset. Present the plan to the user before applying it.',
     parameters: {
-      slug: { type: 'string', required: true, description: 'Hub Profile slug.' },
+      slug: { type: 'string', required: true, description: 'Hub Preset slug.' },
       profile: { type: 'string', description: 'Local target Profile name (default web).' },
-      version: { type: 'string', description: 'Profile Release version (default latest).' },
+      version: { type: 'string', description: 'Preset Release version (default latest).' },
     },
     output,
     async execute(args, exec) {
@@ -96,7 +96,7 @@ export function apply(ctx) {
     name: 'dsh_hub_profile_diff',
     description: 'Compare the current local Profile lock with a public Hub Release, including additions, removals, load-order changes, versions, and immutable sources. This is read-only.',
     parameters: {
-      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      slug: { type: 'string', description: 'Hub Preset slug; defaults to the installed Hub Preset.' },
       profile: { type: 'string', description: 'Local target Profile name (default web).' },
       version: { type: 'string', description: 'Target Release version (default latest).' },
     },
@@ -114,7 +114,7 @@ export function apply(ctx) {
     name: 'dsh_hub_profile_upgrade_plan',
     description: 'Create a reviewed plan to upgrade the installed Profile to a selected Hub Release. Returns an up-to-date result without creating a mutation when no change is needed.',
     parameters: {
-      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      slug: { type: 'string', description: 'Hub Preset slug; defaults to the installed Hub Preset.' },
       profile: { type: 'string', description: 'Local target Profile name (default web).' },
       version: { type: 'string', description: 'Target Release version (default latest).' },
     },
@@ -132,7 +132,7 @@ export function apply(ctx) {
     name: 'dsh_hub_profile_doctor',
     description: 'Diagnose the local Profile directory, lockfile, bundle order, installed versions, required inputs, and drift from a Hub Release. This is read-only.',
     parameters: {
-      slug: { type: 'string', description: 'Hub Profile slug; defaults to the installed Hub Profile.' },
+      slug: { type: 'string', description: 'Hub Preset slug; defaults to the installed Hub Preset.' },
       profile: { type: 'string', description: 'Local Profile name (default web).' },
       version: { type: 'string', description: 'Release used for drift and input checks (default latest).' },
     },
@@ -148,7 +148,7 @@ export function apply(ctx) {
 
   ctx.tools.register(defineTool({
     name: 'dsh_hub_operation_apply',
-    description: 'Apply a previously reviewed DSH Hub Plugin or Profile mutation plan. Set confirmed=true only after the user explicitly confirms that exact plan.',
+    description: 'Apply a previously reviewed DSH Hub Plugin or Preset mutation plan. Set confirmed=true only after the user explicitly confirms that exact plan.',
     parameters: {
       planId: { type: 'string', required: true, description: 'Plan UUID returned by any DSH Hub planning tool.' },
       confirmed: { type: 'boolean', required: true, description: 'Must reflect explicit user confirmation of this plan.' },
@@ -165,11 +165,11 @@ export function apply(ctx) {
     name: 'dsh_hub_profile_share_plan',
     description: 'Create a non-mutating plan to publish the exact current local Profile as an immutable Hub Release. Review the captured layers and local input contract before applying it.',
     parameters: {
-      slug: { type: 'string', required: true, description: 'New or owned Hub Profile slug.' },
+      slug: { type: 'string', required: true, description: 'New or owned Hub Preset slug.' },
       version: { type: 'string', required: true, description: 'Exact SemVer for the immutable Release.' },
       profile: { type: 'string', description: 'Local source Profile name (default web).' },
-      displayName: { type: 'string', description: 'Public Profile name.' },
-      description: { type: 'string', description: 'Public Profile description.' },
+      displayName: { type: 'string', description: 'Public Preset name.' },
+      description: { type: 'string', description: 'Public Preset description.' },
       runtimeVersion: { type: 'string', description: 'Exact DSH runtime; auto-detected when omitted.' },
     },
     output,

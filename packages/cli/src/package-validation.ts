@@ -79,7 +79,7 @@ export async function validatePackageDirectory(
       .filter((packageName) => !profile.data.dependencies[packageName])
       .map((packageName) => `${packageName} has no dependency selector; Hub will use latest`);
     if (!listing.summary && !listing.description) {
-      warnings.push("Add dsh.hub.summary or description for the profile listing");
+      warnings.push("Add dsh.hub.summary or description for the preset listing");
     }
     return {
       kind: "profile",

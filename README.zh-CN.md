@@ -6,11 +6,11 @@
 
 [English](README.md) · **简体中文**
 
-**把你的整套 DeepSeek Harness 配置打包成一个带版本、可复现的 Profile，分享给任何人。**
+**把你的整套 DeepSeek Harness 配置打包成一个带版本、可复现的环境预设，分享给任何人。**
 
 捕获本地正在运行的插件、加载顺序、运行时和配置，发布为一个不可变的 Release。其他人一条命令即可应用，落地前可以审阅每一处变更，不满意随时回滚。
 
-### 🌐 [dshpluginhub.ai](https://dshpluginhub.ai) &nbsp;·&nbsp; [浏览插件](https://dshpluginhub.ai/plugins) &nbsp;·&nbsp; [探索 Profile](https://dshpluginhub.ai/profiles) &nbsp;·&nbsp; [文档](https://dshpluginhub.ai/docs)
+### 🌐 [dshpluginhub.ai](https://dshpluginhub.ai) &nbsp;·&nbsp; [浏览插件](https://dshpluginhub.ai/plugins) &nbsp;·&nbsp; [探索环境预设](https://dshpluginhub.ai/profiles) &nbsp;·&nbsp; [文档](https://dshpluginhub.ai/docs)
 
 [![npm version](https://img.shields.io/npm/v/%40dsh-plugin-hub%2Fcli?label=npm&color=cb3837)](https://www.npmjs.com/package/@dsh-plugin-hub/cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/pax-beehive/dsh-hub-cli/ci.yml?branch=main&label=CI)](https://github.com/pax-beehive/dsh-hub-cli/actions/workflows/ci.yml)
@@ -21,7 +21,7 @@
 
 <sub>本仓库是 Hub 的开源客户端。网站、API 和注册表位于 <a href="https://dshpluginhub.ai">dshpluginhub.ai</a>。</sub>
 
-[快速开始](#快速开始) · [为什么需要可分享的 Profile](#为什么需要可分享的-profile) · [命令一览](#命令一览) · [支持](SUPPORT.zh-CN.md) · [参与贡献](CONTRIBUTING.zh-CN.md) · [治理](GOVERNANCE.zh-CN.md) · [安全](SECURITY.zh-CN.md)
+[快速开始](#快速开始) · [为什么需要可分享的环境预设](#为什么需要可分享的环境预设) · [命令一览](#命令一览) · [支持](SUPPORT.zh-CN.md) · [参与贡献](CONTRIBUTING.zh-CN.md) · [治理](GOVERNANCE.zh-CN.md) · [安全](SECURITY.zh-CN.md)
 
 </div>
 
@@ -30,13 +30,13 @@
 ```bash
 npm install --global @dsh-plugin-hub/cli
 
-# 把同事的 Profile 应用到本地名为 "web" 的 harness
+# 把同事的环境预设应用到本地名为 "web" 的 harness
 dsh-hub profile apply dsh-web-workspace --version 0.1.0 --profile web
 ```
 
 这一条命令会按作者发布时的精确版本、精确顺序和精确 patch 安装插件。不是"今天的 latest 是什么就装什么"，而是作者当时拥有的那一套。
 
-## 为什么需要可分享的 Profile
+## 为什么需要可分享的环境预设
 
 一套 DeepSeek Harness（DSH）配置远不止一份插件清单。它包括特定的运行时版本、一组特定版本的插件、它们的加载顺序、把它们串起来的 `cordis.patch.yml`，以及几个存放密钥的环境变量。
 
@@ -50,7 +50,7 @@ flowchart LR
         A["~/.dsh/profiles/web<br/>插件 · 顺序 · patch · 运行时"]
     end
     subgraph hub["DSH Plugin Hub"]
-        R["Profile Release<br/><b>dsh-web-workspace@0.1.0</b><br/>sha256 内容哈希"]
+        R["环境预设 Release<br/><b>dsh-web-workspace@0.1.0</b><br/>sha256 内容哈希"]
     end
     subgraph team["任何人"]
         T1["同事"]
@@ -64,7 +64,7 @@ flowchart LR
     R -- "dsh-hub profile apply" --> T3
 ```
 
-| 没有 DSH Hub | 有了共享 Profile |
+| 没有 DSH Hub | 有了共享环境预设 |
 | --- | --- |
 | "把这六个插件装一下" | 一个 slug 加一个版本号 |
 | 几天之内版本就漂移 | 每个版本、来源和完整性哈希都被锁定 |
@@ -74,18 +74,18 @@ flowchart LR
 | 弄坏了？从头再来 | `profile rollback` 恢复上一个完整版本 |
 
 <div align="center">
-<a href="https://dshpluginhub.ai/profiles"><img src="docs/assets/hub-profiles.png" alt="dshpluginhub.ai 上的 Profile" width="820"></a>
+<a href="https://dshpluginhub.ai/profiles"><img src="docs/assets/hub-profiles.png" alt="dshpluginhub.ai 上的环境预设" width="820"></a>
 
-<sub>在 <a href="https://dshpluginhub.ai/profiles">dshpluginhub.ai/profiles</a> 浏览社区 Profile，或用网页构建器创建你自己的。</sub>
+<sub>在 <a href="https://dshpluginhub.ai/profiles">dshpluginhub.ai/profiles</a> 浏览社区环境预设，或用网页构建器创建你自己的。</sub>
 </div>
 
-## Profile Release 里有什么
+## 环境预设 Release 里有什么
 
 Release 是一份很小的、按内容寻址的文档。CLI 在对它做任何操作之前都会先校验哈希。
 
 ```mermaid
 flowchart TB
-    R["<b>Profile Release</b><br/>dsh-web-workspace @ 0.1.0<br/><code>contentHash: sha256:…</code>"]
+    R["<b>环境预设 Release</b><br/>dsh-web-workspace @ 0.1.0<br/><code>contentHash: sha256:…</code>"]
     RT["<b>运行时</b><br/>@deepseek-ai/dsh 4.2.1"]
     P["<b>Patch</b><br/>cordis.patch.yml"]
     I["<b>输入</b><br/>OPENAI_API_KEY（密钥）<br/>SEARCH_ENDPOINT"]
@@ -106,7 +106,7 @@ flowchart TB
 - **运行时**固定为作者验证过的那个精确 DSH 版本。
 - **Bundle** 是有序的。npm 来源带完整性哈希；GitHub 来源必须指向完整的 40 位 commit，不允许是分支。
 - **Patch** 是作者的 `cordis.patch.yml`，原样发布。
-- **输入**声明这个 Profile 需要哪些环境变量。如果 patch 里包含看起来像凭据的值，CLI 会拒绝发布。
+- **输入**声明这个环境预设需要哪些环境变量。如果 patch 里包含看起来像凭据的值，CLI 会拒绝发布。
 
 ## 快速开始
 
@@ -117,7 +117,7 @@ npm install --global @dsh-plugin-hub/cli
 dsh-hub --help
 ```
 
-### 应用别人的 Profile
+### 应用别人的环境预设
 
 ```bash
 # 找一个
@@ -215,8 +215,8 @@ flowchart LR
 
 | 包 | 职责 |
 | --- | --- |
-| [`@dsh-plugin-hub/schemas`](packages/schemas) | 运行时校验的插件、Profile 和 Hub API 契约 |
-| [`@dsh-plugin-hub/registry`](packages/registry) | 确定性的版本解析和 Profile bundle 排序 |
+| [`@dsh-plugin-hub/schemas`](packages/schemas) | 运行时校验的插件、环境预设和 Hub API 契约 |
+| [`@dsh-plugin-hub/registry`](packages/registry) | 确定性的版本解析和环境预设 bundle 排序 |
 | [`@dsh-plugin-hub/cli`](packages/cli) | `dsh-hub` 命令：搜索、计划、应用、diff、doctor、分享、回滚 |
 | [`@dsh-plugin-hub/dsh-plugin`](packages/dsh-plugin) | 基于同一套计划/应用流水线的 DSH agent 工具 |
 
@@ -228,20 +228,21 @@ flowchart LR
 | --- | --- |
 | `dsh-hub search <query>` | 搜索插件目录 |
 | `dsh-hub info <package> [--version]` | 查看插件解析后的版本、来源、兼容性和安全评估 |
+| `dsh-hub sync <package>` | 立即同步一个 npm 包，让刚发布的插件或环境预设版本不必等定时任务 |
 | `dsh-hub install <package> [--version] [--profile]` | 把单个插件安装到本地 Profile |
-| `dsh-hub profile search <query>` | 搜索已发布的 Profile |
-| `dsh-hub profile apply <slug> [--version] [--profile]` | 应用一个 Profile Release |
-| `dsh-hub profile upgrade [slug] [--version] [--profile]` | 把已安装的 Profile 升级到另一个 Release |
+| `dsh-hub profile search <query>` | 搜索已发布的环境预设 |
+| `dsh-hub profile apply <slug> [--version] [--profile]` | 应用一个环境预设 Release |
+| `dsh-hub profile upgrade [slug] [--version] [--profile]` | 把已安装的环境预设升级到另一个 Release |
 | `dsh-hub profile diff [slug] [--version] [--profile]` | 对比本地状态和某个 Release |
 | `dsh-hub profile doctor [slug] [--profile]` | 检查目录、lockfile、顺序、已安装版本、必需输入和漂移 |
 | `dsh-hub profile share <slug> --version <v> [--profile]` | 把本地 Profile 发布为不可变的 Release |
-| `dsh-hub profile capture <slug> [--profile]` | 打印捕获到的 Profile 草稿，不发布 |
+| `dsh-hub profile capture <slug> [--profile]` | 打印捕获到的环境预设草稿，不发布 |
 | `dsh-hub profile import <file.dshprofile> [--profile]` | 从导出的归档文件应用 Release |
 | `dsh-hub profile history [--profile]` | 列出可恢复的本地版本 |
 | `dsh-hub profile rollback [revision] [--profile]` | 恢复到之前的某个版本 |
 | `dsh-hub operation apply <plan-id>` | 执行之前生成的计划 |
 | `dsh-hub init [dir] --repository <owner/repo>` | 生成一个新插件包的骨架 |
-| `dsh-hub validate [dir]` | 校验一个插件或 Profile 包目录 |
+| `dsh-hub validate [dir]` | 校验一个插件或环境预设包目录 |
 | `dsh-hub login` / `logout` | 通过设备码登录 Hub |
 | `dsh-hub telemetry state\|on\|off` | 管理匿名使用统计 |
 

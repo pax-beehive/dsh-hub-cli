@@ -126,7 +126,7 @@ export async function setTelemetryPreference(enabled: boolean, options?: {
 }
 
 export const telemetryNotice = `dsh-hub collects anonymous aggregate CLI usage to improve reliability and prioritise maintenance.
-No telemetry is sent during this first-notice run. Future eligible commands report only the public package/Profile name and version, command outcome, stable error category, duration, platform, architecture, and CLI version. No account, machine ID, local path, configuration value, environment value, or secret is included.
+No telemetry is sent during this first-notice run. Future eligible commands report only the public package/preset name and version, command outcome, stable error category, duration, platform, architecture, and CLI version. No account, machine ID, local path, configuration value, environment value, or secret is included.
 Disable before the next run with: dsh-hub telemetry off
 Inspect the setting with: dsh-hub telemetry state
 Privacy details: https://dshpluginhub.ai/privacy`;

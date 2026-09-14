@@ -1,6 +1,6 @@
 # @dsh-plugin-hub/registry
 
-Deterministic version resolution and Profile planning for
+Deterministic version resolution and Preset planning for
 [DSH Plugin Hub](https://dshpluginhub.ai).
 
 ## Install
@@ -13,7 +13,7 @@ npm install @dsh-plugin-hub/registry
 
 - Resolves exact Plugin versions from semver selectors and dist-tags
 - Excludes withdrawn versions
-- Preserves an author-confirmed Profile sequence
+- Preserves an author-confirmed Preset sequence
 - Validates `before` and `after` ordering constraints
 - Detects duplicate bundles, ordering cycles, and entry ID conflicts
 - Produces exact install specs and integrity metadata
@@ -35,7 +35,7 @@ The registry package collects no telemetry. Anonymous lifecycle telemetry is a
 CLI runtime feature and follows the controls documented by
 `@dsh-plugin-hub/cli`.
 
-Browse public DSH plugins and Profiles at
+Browse public DSH plugins and Presets at
 [dshpluginhub.ai](https://dshpluginhub.ai).
 
 This is an independent community project and is not affiliated with or endorsed

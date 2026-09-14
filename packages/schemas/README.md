@@ -1,11 +1,11 @@
 # @dsh-plugin-hub/schemas
 
-Shared schemas for DSH plugins, version-locked Profiles, Profile Releases, and
+Shared schemas for DSH plugins, version-locked Presets, Preset Releases, and
 DSH Plugin Hub API payloads.
 
 - Website: [dshpluginhub.ai](https://dshpluginhub.ai)
 - Browse plugins: [dshpluginhub.ai/plugins](https://dshpluginhub.ai/plugins)
-- Explore Profiles: [dshpluginhub.ai/profiles](https://dshpluginhub.ai/profiles)
+- Explore Presets: [dshpluginhub.ai/profiles](https://dshpluginhub.ai/profiles)
 
 ## Install
 
@@ -26,7 +26,7 @@ const profile = dshProfileManifestSchema.parse(profilePackageJson);
 ```
 
 The package exports Zod schemas and inferred TypeScript types for portable DSH
-bundle manifests, Plugin Hub records, Profile drafts and immutable releases.
+bundle manifests, Plugin Hub records, Preset drafts and immutable releases.
 Use it when building a DSH plugin, integration, validator, or custom Hub client.
 
 Version `0.2.0` is released in lockstep with the CLI, registry, and DSH adapter.
