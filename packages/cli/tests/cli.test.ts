@@ -22,6 +22,7 @@ import {
 import { createPluginStarter } from "../src/scaffold.ts";
 import { validatePackageDirectory } from "../src/package-validation.ts";
 import { HubApiClient } from "../src/api-client.ts";
+import { getAccessToken } from "../dist/auth.js";
 import {
   applyOperationPlan,
   createPluginInstallPlan,
@@ -180,6 +181,42 @@ test("sync posts the package name and reports accepted and rejected results", as
 
 test("sync requires a Hub login", async () => {
   await assert.rejects(new HubApiClient().syncPackage("dsh-example"), /authentication is required/);
+});
+
+test("DSH_HUB_TOKEN replaces the stored WorkOS session in CI", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dsh-hub-token-"));
+  const previous = process.env.DSH_HUB_TOKEN;
+  const original = globalThis.fetch;
+  try {
+    delete process.env.DSH_HUB_TOKEN;
+    await assert.rejects(getAccessToken(root), /Not signed in/);
+
+    // Surrounding whitespace is trimmed so a secret copied with a trailing
+    // newline still authenticates.
+    process.env.DSH_HUB_TOKEN = "  dshhub_ci_token  ";
+    assert.equal(await getAccessToken(root), "dshhub_ci_token");
+
+    let authorization: string | null = null;
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      authorization = new Headers(init?.headers).get("authorization");
+      return new Response(JSON.stringify({
+        status: "accepted",
+        kind: "plugin",
+        packageName: "dsh-example",
+        slug: "dsh-example",
+        versionsAdded: 1,
+        versionsSeen: 1,
+        latestVersion: "1.0.0",
+      }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const client = new HubApiClient(undefined, () => getAccessToken(root));
+    await client.syncPackage("dsh-example");
+    assert.equal(authorization, "Bearer dshhub_ci_token");
+  } finally {
+    globalThis.fetch = original;
+    if (previous === undefined) delete process.env.DSH_HUB_TOKEN;
+    else process.env.DSH_HUB_TOKEN = previous;
+  }
 });
 
 test("validates a shared Profile with its exact DSH runtime", async () => {

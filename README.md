@@ -142,6 +142,9 @@ dsh-hub profile share my-stack --version 1.0.0 --profile web --dry-run
 # Sign in once, then publish an immutable Release
 dsh-hub login
 dsh-hub profile share my-stack --version 1.0.0 --profile web
+
+# CI: publish with a publish-scoped token instead of an interactive login
+DSH_HUB_TOKEN=dshhub_... dsh-hub profile share my-stack --version 1.0.0 --profile web
 ```
 
 ### Upgrade and roll back
