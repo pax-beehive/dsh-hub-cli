@@ -81,6 +81,9 @@ Options:
   --plan            Persist a preconditioned operation plan without applying it
   --json            Print machine-readable output
   --no-telemetry    Disable anonymous aggregate CLI usage reporting
+
+Environment:
+  DSH_HUB_TOKEN     Publish-scoped Hub token for CI, used instead of dsh-hub login
 `;
 
 function print(value: unknown, json: boolean) {

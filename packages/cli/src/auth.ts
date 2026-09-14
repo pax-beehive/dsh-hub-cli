@@ -89,7 +89,17 @@ async function readAuthState(dshHome?: string): Promise<AuthState> {
   catch { throw new Error("Not signed in. Run `dsh-hub login` first."); }
 }
 
+// DSH_HUB_TOKEN is the CI credential: it replaces the WorkOS session entirely,
+// so an unattended pipeline never runs the device-login flow and never depends
+// on a short-lived access token being refreshed.
+function environmentToken(): string | undefined {
+  const token = process.env.DSH_HUB_TOKEN?.trim();
+  return token ? token : undefined;
+}
+
 export async function getAccessToken(dshHome?: string): Promise<string> {
+  const configured = environmentToken();
+  if (configured) return configured;
   const state = await readAuthState(dshHome);
   if (!tokenExpiresSoon(state.accessToken)) return state.accessToken;
   const response = await formPost(tokenEndpoint, {

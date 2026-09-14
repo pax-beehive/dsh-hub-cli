@@ -4,6 +4,8 @@ All four `@dsh-plugin-hub/*` packages are released together under one version.
 
 ## Unreleased
 
+- `DSH_HUB_TOKEN` publishes from CI without an interactive `dsh-hub login`.
+
 ## 0.3.0
 
 - Add `dsh-hub sync <package>` for an immediate npm sync, so a version published seconds ago is indexed without waiting for the schedule.

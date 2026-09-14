@@ -142,6 +142,9 @@ dsh-hub profile share my-stack --version 1.0.0 --profile web --dry-run
 # 登录一次，然后发布为不可变的 Release
 dsh-hub login
 dsh-hub profile share my-stack --version 1.0.0 --profile web
+
+# CI：用发布专用令牌代替交互式登录
+DSH_HUB_TOKEN=dshhub_... dsh-hub profile share my-stack --version 1.0.0 --profile web
 ```
 
 ### 升级与回滚

@@ -47,6 +47,32 @@ and user-confirmed sequence. Apply uses a staging Profile, validation, atomic
 switch, recoverable local revisions, and an auditable build-script allowlist
 derived from each pinned GitHub source.
 
+## Publishing from CI
+
+`dsh-hub login` is an interactive WorkOS device flow, so unattended pipelines
+use a publish-scoped Hub token instead. Create one in the Dashboard
+(**访问令牌 / Access tokens**) and expose it as `DSH_HUB_TOKEN`:
+
+```bash
+DSH_HUB_TOKEN=dshhub_... dsh-hub sync my-plugin
+DSH_HUB_TOKEN=dshhub_... dsh-hub profile share my-stack --version 1.0.0 --profile web
+```
+
+The variable is trimmed, takes precedence over the session saved in
+`~/.dsh/.hub/auth.json`, and needs no login or token refresh. A token may call
+only:
+
+```text
+POST /manage/sync/npm
+POST /manage/publish/npm
+PUT  /manage/profiles/{slug}/draft
+POST /manage/profiles/{slug}/releases
+```
+
+Every other `/manage` route requires a browser session, so a leaked token cannot
+edit listings, change GitHub connections or mint another token. Revoke it from
+the Dashboard; revocation applies to the next request.
+
 ## Anonymous CLI telemetry
 
 On first run the CLI prints a notice, saves an enabled preference for later
