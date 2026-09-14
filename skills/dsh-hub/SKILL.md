@@ -1,20 +1,23 @@
 ---
 name: dsh-hub
-description: Safely discover, review, install, upgrade, share, and roll back DSH Plugin Hub Profiles through the dsh-hub CLI.
+description: Safely discover, review, install, upgrade, share, and roll back DSH Plugin Hub Presets through the dsh-hub CLI.
 ---
 
-# DSH Hub Profile workflow
+# DSH Hub Preset workflow
 
 Use the installed `dsh-hub` CLI as the sole local execution authority.
 
 ## Discover and assess
 
-1. Search Plugins with `dsh-hub search <query> --json` or Profiles with
+1. Search Plugins with `dsh-hub search <query> --json` or Presets with
    `dsh-hub profile search <query> --json`.
-2. Inspect a Plugin through `dsh-hub info <package> --version <selector>
+2. When a publisher has just released a version, run
+   `dsh-hub sync <package> --json` to index it immediately instead of waiting
+   for the scheduled npm scan. It reports the Hub slug and latest version.
+3. Inspect a Plugin through `dsh-hub info <package> --version <selector>
    --json`. Report the resolved exact version, source, DSH compatibility,
    runtime surfaces, and security assessment.
-3. Before recommending a Profile change, run `dsh-hub profile doctor
+4. Before recommending a Preset change, run `dsh-hub profile doctor
    [slug] --profile <name> --json` and `dsh-hub profile diff [slug]
    --version <version> --profile <name> --json` when a remote target exists.
 
@@ -31,9 +34,9 @@ Use the installed `dsh-hub` CLI as the sole local execution authority.
 
 1. For first application, create the plan with `dsh-hub profile apply <slug>
    --version <version> --profile <name> --plan --json`. For an existing
-   Profile, use `dsh-hub profile upgrade [slug] --version <version>
+   Preset, use `dsh-hub profile upgrade [slug] --version <version>
    --profile <name> --plan --json` so the review includes a diff.
-2. Show the user the target Profile, exact Profile Release, ordered Plugins,
+2. Show the user the target Profile, exact Preset Release, ordered Plugins,
    exact Plugin versions, required local inputs, and current-state precondition.
 3. Obtain explicit confirmation for that plan ID.
 4. Run `dsh-hub operation apply <plan-id> --json`.
@@ -46,12 +49,12 @@ report any remaining local or remote drift.
 Plans expire after 30 minutes and fail if the target changed after planning.
 Create a fresh plan when either condition occurs.
 
-## Share the current Profile
+## Share the current Preset
 
 1. Create a plan with `dsh-hub profile share <slug> --profile <name>
    --version <semver> --plan --json`.
 2. Present the exact runtime, ordered layers, versions, patch, declared input
-   keys, and local Profile hash. Stop on `file:`, `link:`, `workspace:` or
+   keys, and local Preset hash. Stop on `file:`, `link:`, `workspace:` or
    another unpublished local Plugin source.
 3. Obtain explicit confirmation and apply the returned plan ID through
    `dsh-hub operation apply <plan-id> --json`.

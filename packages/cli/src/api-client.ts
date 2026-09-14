@@ -9,6 +9,20 @@ import {
   type PluginRecord,
 } from "@dsh-plugin-hub/schemas";
 
+// POST /manage/sync/npm runs the npm sync inline: 200 with the accepted
+// result, or 422 with a machine-readable reason when the package is neither a
+// DSH bundle nor a preset declaration. Both are normal outcomes.
+export interface HubPackageSyncResult {
+  status: "accepted" | "rejected";
+  kind?: "plugin" | "profile";
+  slug?: string;
+  packageName: string;
+  versionsAdded?: number;
+  versionsSeen?: number;
+  latestVersion?: string;
+  reason?: string;
+}
+
 export class HubApiClient {
   readonly baseUrl: string;
   readonly accessToken?: () => Promise<string>;
@@ -74,6 +88,27 @@ export class HubApiClient {
   async profiles(query: string) {
     const payload = await this.get(`/profiles?q=${encodeURIComponent(query)}`);
     return profileSearchResponseSchema.parse(payload);
+  }
+
+  async syncPackage(packageName: string): Promise<HubPackageSyncResult> {
+    const token = await this.accessToken?.();
+    if (!token) throw new Error("Hub authentication is required");
+    const response = await fetch(`${this.baseUrl}/manage/sync/npm`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`,
+        "user-agent": "dsh-hub-cli/0.2.0",
+      },
+      body: JSON.stringify({ packageName }),
+      signal: AbortSignal.timeout(120_000),
+    });
+    const text = await response.text();
+    if (response.status === 200 || response.status === 422) {
+      return JSON.parse(text) as HubPackageSyncResult;
+    }
+    throw new Error(`Hub API ${response.status}: ${text.slice(0, 500)}`);
   }
 
   async saveProfileDraft(draft: ProfileDraft): Promise<ProfileDraft> {
