@@ -260,7 +260,7 @@ export async function applyOperationPlan(options: {
     } else if (plan.kind === "profile.apply" || plan.kind === "profile.upgrade") {
       const current = await currentState(plan.input.profile, options.dshHome);
       if (current?.contentHash !== plan.precondition.currentContentHash) {
-        throw new Error("Profile changed after planning; create a new plan");
+        throw new Error("Preset changed after planning; create a new plan");
       }
       const result = await (options.install ?? installResolvedProfile)({
         profile: plan.input.profile,
@@ -273,7 +273,7 @@ export async function applyOperationPlan(options: {
     } else if (plan.kind === "profile.rollback") {
       const current = await currentState(plan.input.profile, options.dshHome);
       if (current?.contentHash !== plan.precondition.currentContentHash) {
-        throw new Error("Profile changed after planning; create a new plan");
+        throw new Error("Preset changed after planning; create a new plan");
       }
       const result = await (options.rollback ?? rollbackProfile)({
         profile: plan.input.profile,
@@ -292,7 +292,7 @@ export async function applyOperationPlan(options: {
       });
       currentDraft.runtime = plan.input.draft.runtime;
       if (profileDraftFingerprint(currentDraft) !== plan.precondition.localProfileHash) {
-        throw new Error("Local Profile changed after planning; create a new plan");
+        throw new Error("Preset draft changed after planning; create a new plan");
       }
       if (options.share) {
         publication = await options.share(plan.input);

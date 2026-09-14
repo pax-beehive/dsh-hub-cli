@@ -1,11 +1,11 @@
 # @dsh-plugin-hub/dsh-plugin
 
 Agent-facing DSH tools for planning, sharing, applying, and rolling back
-reproducible [DSH Plugin Hub](https://dshpluginhub.ai) Profiles.
+reproducible [DSH Plugin Hub](https://dshpluginhub.ai) Presets.
 
 - Website: [dshpluginhub.ai](https://dshpluginhub.ai)
 - Browse plugins: [dshpluginhub.ai/plugins](https://dshpluginhub.ai/plugins)
-- Explore Profiles: [dshpluginhub.ai/profiles](https://dshpluginhub.ai/profiles)
+- Explore Presets: [dshpluginhub.ai/profiles](https://dshpluginhub.ai/profiles)
 
 Install into a Profile:
 
@@ -36,7 +36,7 @@ as direct CLI use.
 
 This adapter does not add a separate telemetry client. Commands it invokes use
 the installed `dsh-hub` CLI preference. On the CLI's first run a notice is
-shown and that run sends no event; later eligible install and Profile lifecycle
+shown and that run sends no event; later eligible install and Preset lifecycle
 operations report anonymous aggregates unless the user runs `dsh-hub telemetry
 off` or uses one of the documented per-invocation opt-outs. See the
 [`@dsh-plugin-hub/cli` README](https://github.com/pax-beehive/dsh-hub-cli/tree/main/packages/cli#anonymous-cli-telemetry) for the

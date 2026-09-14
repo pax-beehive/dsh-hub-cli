@@ -139,6 +139,49 @@ test("uses the bearer-aware production API origin by default", () => {
   assert.equal(new HubApiClient().baseUrl, "https://api.dshpluginhub.ai/api/v1");
 });
 
+test("sync posts the package name and reports accepted and rejected results", async () => {
+  const original = globalThis.fetch;
+  const calls: Array<{ url: string; body: unknown }> = [];
+  try {
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ url: String(input), body: JSON.parse(String(init?.body)) });
+      return new Response(JSON.stringify({
+        status: "accepted",
+        kind: "profile",
+        packageName: "dsh-example-preset",
+        slug: "example-preset",
+        versionsAdded: 1,
+        versionsSeen: 2,
+        latestVersion: "1.2.3",
+      }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const client = new HubApiClient(undefined, async () => "token");
+    const accepted = await client.syncPackage("dsh-example-preset");
+    assert.deepEqual(calls, [{
+      url: "https://api.dshpluginhub.ai/api/v1/manage/sync/npm",
+      body: { packageName: "dsh-example-preset" },
+    }]);
+    assert.equal(accepted.status, "accepted");
+    assert.equal(accepted.kind, "profile");
+    assert.equal(accepted.latestVersion, "1.2.3");
+
+    globalThis.fetch = (async () => new Response(JSON.stringify({
+      status: "rejected",
+      packageName: "not-a-plugin",
+      reason: "not_a_dsh_bundle_or_profile",
+    }), { status: 422, headers: { "content-type": "application/json" } })) as typeof fetch;
+    const rejected = await client.syncPackage("not-a-plugin");
+    assert.equal(rejected.status, "rejected");
+    assert.equal(rejected.reason, "not_a_dsh_bundle_or_profile");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("sync requires a Hub login", async () => {
+  await assert.rejects(new HubApiClient().syncPackage("dsh-example"), /authentication is required/);
+});
+
 test("validates a shared Profile with its exact DSH runtime", async () => {
   let command: { command: string; args: string[] } | undefined;
   await validateCurrentProfile("web", "0.1.1-rc.2", async (value) => { command = value; });

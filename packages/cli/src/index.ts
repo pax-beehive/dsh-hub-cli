@@ -93,7 +93,7 @@ export function executeDshCommand(command: DshInstallCommand): Promise<void> {
 export function assertSupportedNodeVersion(version = process.versions.node): void {
   const [major = 0, minor = 0] = version.split(".").map((part) => Number.parseInt(part, 10));
   if (major < 22 || (major === 22 && minor < 13)) {
-    throw new Error(`Profiles require Node.js >=22.13.0 (current: ${version})`);
+    throw new Error(`Presets require Node.js >=22.13.0 (current: ${version})`);
   }
 }
 
@@ -111,7 +111,7 @@ export async function assertProfileApplyPrerequisites(options?: {
 }): Promise<void> {
   assertSupportedNodeVersion(options?.nodeVersion);
   if (!await (options?.pnpmAvailable ?? (() => commandSucceeds("pnpm", ["--version"])))()) {
-    throw new Error("Profiles require pnpm on PATH. Install pnpm, then retry.");
+    throw new Error("Presets require pnpm on PATH. Install pnpm, then retry.");
   }
 }
 
@@ -175,7 +175,7 @@ export async function resolvePinnedGitHubBuildAllowlist(bundles: ResolvedProfile
   const keys = await Promise.all(bundles.map(async (bundle) => {
     if (bundle.sourceKind !== "github") return [];
     const match = bundle.installSpec.match(pinnedGitHubSpec);
-    if (!match) throw new Error(`GitHub Profile bundle must use an immutable commit: ${bundle.installSpec}`);
+    if (!match) throw new Error(`GitHub Preset bundle must use an immutable commit: ${bundle.installSpec}`);
     const [, owner, repository, commit] = match;
     const prepareKey = bundle.packageName;
     const response = await fetch(
@@ -234,10 +234,10 @@ async function structuralValidation(stage: string, resolved: ResolvedProfile) {
   const actual = dsh?.profile?.bundles;
   const expected = resolved.bundles.map((bundle) => bundle.packageName);
   if (!Array.isArray(actual) || JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error("Staged Profile bundle sequence does not match the release");
+    throw new Error("Staged Preset bundle sequence does not match the release");
   }
   if (!(await exists(join(stage, "cordis.patch.yml")))) {
-    throw new Error("Staged Profile is missing cordis.patch.yml");
+    throw new Error("Staged Preset is missing cordis.patch.yml");
   }
 }
 

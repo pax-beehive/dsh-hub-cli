@@ -43,13 +43,14 @@ import {
 import { createPluginStarter } from "./scaffold.js";
 import { validatePackageDirectory } from "./package-validation.js";
 
-const usage = `dsh-hub — DeepSeek Harness plugin and profile client
+const usage = `dsh-hub — DeepSeek Harness plugin and preset client
 
 Usage:
   dsh-hub init [directory] --repository <owner/repository> [--name <npm-package>]
   dsh-hub validate [directory] [--json]
   dsh-hub search <query> [--json]
   dsh-hub info <package> [--version <selector>] [--json]
+  dsh-hub sync <package> [--json]
   dsh-hub install <package> [--version <selector>] [--profile web] [--dry-run|--plan --json]
   dsh-hub login
   dsh-hub logout
@@ -72,8 +73,8 @@ Options:
   --name <package>  npm package name for a generated starter
   --repository <r>  Public GitHub owner/repository for a generated starter
   --display-name <n> Human-readable name for a generated starter
-  --description <d> Profile description when sharing
-  --runtime-version <v> Exact local DSH runtime version for a Profile Release
+  --description <d> Preset description when sharing
+  --runtime-version <v> Exact local DSH runtime version for a Preset Release
   --profile <name>  Target DSH profile (default: web)
   --version <value> Exact version, dist-tag, or semver range
   --dry-run         Print the resolved commands without changing the profile
@@ -93,7 +94,7 @@ async function resolveProfileTarget(client: HubApiClient, slug: string, version:
   const selected = version === "latest"
     ? profile.versions.find((candidate) => candidate.version === profile.latestVersion)
     : profile.versions.find((candidate) => candidate.version === version);
-  if (!selected) throw new Error(`Profile ${slug} has no version ${version}`);
+  if (!selected) throw new Error(`Preset ${slug} has no version ${version}`);
   verifyProfileRelease(selected);
   const records = await Promise.all(selected.bundles
     .filter((bundle) => bundle.sourceKind !== "builtin")
@@ -258,6 +259,19 @@ async function main() {
     return;
   }
 
+  if (command === "sync" && subject) {
+    const result = await client.syncPackage(subject);
+    if (result.status !== "accepted") {
+      throw new Error(`Hub rejected ${result.packageName}: ${result.reason ?? "unknown reason"}`);
+    }
+    if (json) print(result, true);
+    else {
+      console.log(`Synced ${result.kind === "profile" ? "preset" : "plugin"}: ${result.slug}@${result.latestVersion}`);
+      console.log(`  versions: ${result.versionsAdded ?? 0} added, ${result.versionsSeen ?? 0} seen`);
+    }
+    return;
+  }
+
   if (command === "install" && subject) {
     const plugin = await client.package(subject);
     const selected = resolvePluginVersion(plugin, parsed.values.version);
@@ -322,7 +336,7 @@ async function main() {
   if (command === "profile" && subject === "diff") {
     const current = await readProfileState(parsed.values.profile);
     const slug = value ?? current?.hubProfile?.slug;
-    if (!slug) throw new Error("Profile diff requires a Hub Profile slug or an installed Hub Profile");
+    if (!slug) throw new Error("Preset diff requires a Hub Preset slug or an installed Hub Preset");
     const { profile, selected, resolved } = await resolveProfileTarget(client, slug, parsed.values.version);
     print(diffResolvedProfile({
       profile: parsed.values.profile,
@@ -338,7 +352,7 @@ async function main() {
     if (!parsed.values["dry-run"] && !parsed.values.plan) await assertProfileApplyPrerequisites();
     const current = await readProfileState(parsed.values.profile);
     const slug = value ?? current?.hubProfile?.slug;
-    if (!slug) throw new Error("Profile upgrade requires a Hub Profile slug or an installed Hub Profile");
+    if (!slug) throw new Error("Preset upgrade requires a Hub Preset slug or an installed Hub Preset");
     const { profile, selected, resolved } = await resolveProfileTarget(client, slug, parsed.values.version);
     const diff = diffResolvedProfile({ profile: parsed.values.profile, slug: profile.slug, release: selected, resolved, current });
     if (!diff.changed) {

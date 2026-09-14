@@ -8,7 +8,7 @@ schemas → registry → cli → dsh-plugin
 ```
 
 - `schemas` validates untrusted manifests and API responses at runtime.
-- `registry` resolves selectors into deterministic install and Profile plans.
+- `registry` resolves selectors into deterministic install and Preset plans.
 - `cli` owns authentication, local filesystem changes, command execution,
   staging, validation, revision history, and rollback.
 - `dsh-plugin` exposes agent-facing tools and delegates every mutation to an

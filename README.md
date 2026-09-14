@@ -6,11 +6,11 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-**Share your entire DeepSeek Harness setup as one versioned, reproducible Profile.**
+**Share your entire DeepSeek Harness setup as one versioned, reproducible Preset.**
 
 Capture the plugins, order, runtime, and config you have running locally. Publish it as an immutable Release. Anyone can apply it with a single command, review every change before it lands, and roll back if they don't like it.
 
-### 🌐 [dshpluginhub.ai](https://dshpluginhub.ai) &nbsp;·&nbsp; [Browse Plugins](https://dshpluginhub.ai/plugins) &nbsp;·&nbsp; [Explore Profiles](https://dshpluginhub.ai/profiles) &nbsp;·&nbsp; [Docs](https://dshpluginhub.ai/docs)
+### 🌐 [dshpluginhub.ai](https://dshpluginhub.ai) &nbsp;·&nbsp; [Browse Plugins](https://dshpluginhub.ai/plugins) &nbsp;·&nbsp; [Explore Presets](https://dshpluginhub.ai/profiles) &nbsp;·&nbsp; [Docs](https://dshpluginhub.ai/docs)
 
 [![npm version](https://img.shields.io/npm/v/%40dsh-plugin-hub%2Fcli?label=npm&color=cb3837)](https://www.npmjs.com/package/@dsh-plugin-hub/cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/pax-beehive/dsh-hub-cli/ci.yml?branch=main&label=CI)](https://github.com/pax-beehive/dsh-hub-cli/actions/workflows/ci.yml)
@@ -21,7 +21,7 @@ Capture the plugins, order, runtime, and config you have running locally. Publis
 
 <sub>This repository is the open-source client for the Hub. The website, API, and registry live at <a href="https://dshpluginhub.ai">dshpluginhub.ai</a>.</sub>
 
-[Quick start](#quick-start) · [Why Profiles](#why-shareable-profiles) · [Commands](#command-reference) · [Support](SUPPORT.md) · [Contributing](CONTRIBUTING.md) · [Governance](GOVERNANCE.md) · [Security](SECURITY.md)
+[Quick start](#quick-start) · [Why Presets](#why-shareable-presets) · [Commands](#command-reference) · [Support](SUPPORT.md) · [Contributing](CONTRIBUTING.md) · [Governance](GOVERNANCE.md) · [Security](SECURITY.md)
 
 </div>
 
@@ -30,13 +30,13 @@ Capture the plugins, order, runtime, and config you have running locally. Publis
 ```bash
 npm install --global @dsh-plugin-hub/cli
 
-# Apply a teammate's Profile to your local "web" harness
+# Apply a teammate's Preset to your local "web" harness
 dsh-hub profile apply dsh-web-workspace --version 0.1.0 --profile web
 ```
 
 That one command installs the exact plugin versions, in the exact order, with the exact patch the author published. Not "whatever is latest today." What they had.
 
-## Why shareable Profiles
+## Why shareable Presets
 
 A DeepSeek Harness (DSH) setup is more than a list of plugins. It is a specific runtime version, a set of plugins at specific versions, the order they load in, a `cordis.patch.yml` that wires them together, and a handful of environment variables that hold your keys.
 
@@ -50,7 +50,7 @@ flowchart LR
         A["~/.dsh/profiles/web<br/>plugins · order · patch · runtime"]
     end
     subgraph hub["DSH Plugin Hub"]
-        R["Profile Release<br/><b>dsh-web-workspace@0.1.0</b><br/>sha256 content hash"]
+        R["Preset Release<br/><b>dsh-web-workspace@0.1.0</b><br/>sha256 content hash"]
     end
     subgraph team["Anyone else"]
         T1["Teammate"]
@@ -64,7 +64,7 @@ flowchart LR
     R -- "dsh-hub profile apply" --> T3
 ```
 
-| Without DSH Hub | With a shared Profile |
+| Without DSH Hub | With a shared Preset |
 | --- | --- |
 | "Install these six plugins" | One slug and one version |
 | Versions drift within days | Every version, source, and integrity hash is locked |
@@ -74,18 +74,18 @@ flowchart LR
 | Broke it? Start over | `profile rollback` restores the previous complete revision |
 
 <div align="center">
-<a href="https://dshpluginhub.ai/profiles"><img src="docs/assets/hub-profiles.png" alt="Profiles on dshpluginhub.ai" width="820"></a>
+<a href="https://dshpluginhub.ai/profiles"><img src="docs/assets/hub-profiles.png" alt="Presets on dshpluginhub.ai" width="820"></a>
 
-<sub>Browse community Profiles, or build one in the web builder, at <a href="https://dshpluginhub.ai/profiles">dshpluginhub.ai/profiles</a>.</sub>
+<sub>Browse community Presets, or build one in the web builder, at <a href="https://dshpluginhub.ai/profiles">dshpluginhub.ai/profiles</a>.</sub>
 </div>
 
-## What's inside a Profile Release
+## What's inside a Preset Release
 
 A Release is a small, content-addressed document. The CLI verifies its hash before doing anything with it.
 
 ```mermaid
 flowchart TB
-    R["<b>Profile Release</b><br/>dsh-web-workspace @ 0.1.0<br/><code>contentHash: sha256:…</code>"]
+    R["<b>Preset Release</b><br/>dsh-web-workspace @ 0.1.0<br/><code>contentHash: sha256:…</code>"]
     RT["<b>Runtime</b><br/>@deepseek-ai/dsh 4.2.1"]
     P["<b>Patch</b><br/>cordis.patch.yml"]
     I["<b>Inputs</b><br/>OPENAI_API_KEY (secret)<br/>SEARCH_ENDPOINT"]
@@ -106,7 +106,7 @@ flowchart TB
 - **Runtime** pins the exact DSH version the author verified against.
 - **Bundles** are ordered. npm sources carry integrity hashes. GitHub sources must point at a full 40-character commit, never a branch.
 - **Patch** is the author's `cordis.patch.yml`, published verbatim.
-- **Inputs** declare which environment variables the Profile needs. The CLI refuses to publish a patch that contains a credential-looking value.
+- **Inputs** declare which environment variables the Preset needs. The CLI refuses to publish a patch that contains a credential-looking value.
 
 ## Quick start
 
@@ -117,7 +117,7 @@ npm install --global @dsh-plugin-hub/cli
 dsh-hub --help
 ```
 
-### Apply someone's Profile
+### Apply someone's Preset
 
 ```bash
 # Find one
@@ -215,8 +215,8 @@ flowchart LR
 
 | Package | What it owns |
 | --- | --- |
-| [`@dsh-plugin-hub/schemas`](packages/schemas) | Runtime-validated Plugin, Profile, and Hub API contracts |
-| [`@dsh-plugin-hub/registry`](packages/registry) | Deterministic version resolution and Profile bundle ordering |
+| [`@dsh-plugin-hub/schemas`](packages/schemas) | Runtime-validated Plugin, Preset, and Hub API contracts |
+| [`@dsh-plugin-hub/registry`](packages/registry) | Deterministic version resolution and Preset bundle ordering |
 | [`@dsh-plugin-hub/cli`](packages/cli) | The `dsh-hub` command: search, plans, apply, diff, doctor, share, rollback |
 | [`@dsh-plugin-hub/dsh-plugin`](packages/dsh-plugin) | DSH agent tools backed by the same plan/apply pipeline |
 
@@ -228,20 +228,21 @@ All four ship in lockstep under one version. See [docs/architecture.md](docs/arc
 | --- | --- |
 | `dsh-hub search <query>` | Search the Plugin catalog |
 | `dsh-hub info <package> [--version]` | Show a plugin's resolved version, source, compatibility, and security assessment |
+| `dsh-hub sync <package>` | Run an immediate npm sync so a just-published Plugin or Preset version is indexed without waiting for the schedule |
 | `dsh-hub install <package> [--version] [--profile]` | Install one plugin into a local Profile |
-| `dsh-hub profile search <query>` | Search published Profiles |
-| `dsh-hub profile apply <slug> [--version] [--profile]` | Apply a Profile Release |
-| `dsh-hub profile upgrade [slug] [--version] [--profile]` | Upgrade the installed Profile to another Release |
+| `dsh-hub profile search <query>` | Search published Presets |
+| `dsh-hub profile apply <slug> [--version] [--profile]` | Apply a Preset Release |
+| `dsh-hub profile upgrade [slug] [--version] [--profile]` | Upgrade the installed Preset to another Release |
 | `dsh-hub profile diff [slug] [--version] [--profile]` | Compare local state with a Release |
 | `dsh-hub profile doctor [slug] [--profile]` | Check directory, lockfile, order, installed versions, required inputs, and drift |
-| `dsh-hub profile share <slug> --version <v> [--profile]` | Publish the local Profile as an immutable Release |
-| `dsh-hub profile capture <slug> [--profile]` | Print the captured Profile draft without publishing |
+| `dsh-hub profile share <slug> --version <v> [--profile]` | Publish the local Profile as an immutable Preset Release |
+| `dsh-hub profile capture <slug> [--profile]` | Print the captured Preset draft without publishing |
 | `dsh-hub profile import <file.dshprofile> [--profile]` | Apply a Release from an exported archive |
 | `dsh-hub profile history [--profile]` | List recoverable local revisions |
 | `dsh-hub profile rollback [revision] [--profile]` | Restore a previous revision |
 | `dsh-hub operation apply <plan-id>` | Execute a previously created plan |
 | `dsh-hub init [dir] --repository <owner/repo>` | Scaffold a new plugin package |
-| `dsh-hub validate [dir]` | Validate a plugin or Profile package directory |
+| `dsh-hub validate [dir]` | Validate a plugin or Preset package directory |
 | `dsh-hub login` / `logout` | Sign in to the Hub with a device code |
 | `dsh-hub telemetry state\|on\|off` | Manage anonymous usage reporting |
 

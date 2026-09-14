@@ -18,7 +18,7 @@ export function verifyProfileRelease(release: HubProfileVersion): void {
   const unsigned = { ...release, contentHash: undefined };
   const actual = `sha256:${createHash("sha256").update(canonical(unsigned)).digest("hex")}`;
   if (actual !== release.contentHash) {
-    throw new Error(`Profile Release content hash mismatch: expected ${release.contentHash}, got ${actual}`);
+    throw new Error(`Preset Release content hash mismatch: expected ${release.contentHash}, got ${actual}`);
   }
 }
 
