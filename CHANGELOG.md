@@ -4,6 +4,8 @@ All four `@dsh-plugin-hub/*` packages are released together under one version.
 
 ## Unreleased
 
+## 0.4.0
+
 - `DSH_HUB_TOKEN` publishes from CI without an interactive `dsh-hub login`.
 
 ## 0.3.0

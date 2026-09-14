@@ -1,6 +1,6 @@
 {
   "name": "@dsh-plugin-hub/registry",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Version resolution and profile planning for DSH Hub",
   "keywords": ["dsh-plugin", "deepseek-harness", "profile", "resolver", "registry"],
   "homepage": "https://dshpluginhub.ai",
