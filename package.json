@@ -1,6 +1,6 @@
 {
   "name": "dsh-hub-cli-workspace",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Open-source CLI, schemas, resolver, and DSH agent tools for DSH Plugin Hub",
   "packageManager": "pnpm@10.33.0",
