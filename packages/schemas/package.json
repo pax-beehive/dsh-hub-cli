@@ -1,6 +1,6 @@
 {
   "name": "@dsh-plugin-hub/schemas",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Portable DSH bundle, profile, and Hub API schemas",
   "keywords": ["dsh-plugin", "deepseek-harness", "profile", "schema", "zod"],
   "homepage": "https://dshpluginhub.ai",

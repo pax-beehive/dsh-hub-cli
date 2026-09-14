@@ -1,6 +1,6 @@
 {
   "name": "@dsh-plugin-hub/dsh-plugin",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "DSH tools for planning and applying reproducible Plugin Hub Profiles through the local dsh-hub CLI",
   "keywords": ["dsh-plugin", "deepseek-harness", "profile", "agent-tools", "rollback"],
   "homepage": "https://dshpluginhub.ai",

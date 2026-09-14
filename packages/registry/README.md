@@ -30,7 +30,7 @@ This package performs local deterministic computation. It does not host npm
 packages or make Registry network requests. The shared data contracts live in
 [`@dsh-plugin-hub/schemas`](https://www.npmjs.com/package/@dsh-plugin-hub/schemas).
 
-Version `0.3.0` is released in lockstep with the CLI, schemas, and DSH adapter.
+Version `0.4.0` is released in lockstep with the CLI, schemas, and DSH adapter.
 The registry package collects no telemetry. Anonymous lifecycle telemetry is a
 CLI runtime feature and follows the controls documented by
 `@dsh-plugin-hub/cli`.

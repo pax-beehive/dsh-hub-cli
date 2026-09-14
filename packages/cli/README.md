@@ -3,9 +3,11 @@
 The `dsh-hub` command-line client for discovering DSH plugins, sharing complete
 version-locked Presets, applying them safely, and rolling back local revisions.
 
-Version `0.3.0` adds `dsh-hub sync <package>` for an immediate npm sync.
-The reviewable lifecycle plans, Preset diff/doctor/upgrade, recoverable history
-and rollback, and the telemetry controls documented below arrive with `0.2.0`.
+Version `0.4.0` adds `DSH_HUB_TOKEN` so a pipeline can publish without an
+interactive login. Version `0.3.0` added `dsh-hub sync <package>` for an
+immediate npm sync; the reviewable lifecycle plans, Preset diff/doctor/upgrade,
+recoverable history and rollback, and the telemetry controls documented below
+arrive with `0.2.0`.
 
 - Website: [dshpluginhub.ai](https://dshpluginhub.ai)
 - Browse plugins: [dshpluginhub.ai/plugins](https://dshpluginhub.ai/plugins)
