@@ -19,8 +19,8 @@ catalogs:
       specifier: 5.9.3
       version: 5.9.3
     zod:
-      specifier: 4.5.2
-      version: 4.5.2
+      specifier: 4.6.2
+      version: 4.6.2
 
 importers:
 
@@ -40,7 +40,7 @@ importers:
         version: 5.9.3
       zod:
         specifier: 'catalog:'
-        version: 4.5.2
+        version: 4.6.2
 
   packages/cli:
     dependencies:
@@ -90,7 +90,7 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 4.5.2
+        version: 4.6.2
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -243,8 +243,8 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
-  zod@4.5.2:
-    resolution: {integrity: sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg==}
+  zod@4.6.2:
+    resolution: {integrity: sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ==}
 
 snapshots:
 
@@ -371,4 +371,4 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  zod@4.5.2: {}
+  zod@4.6.2: {}
