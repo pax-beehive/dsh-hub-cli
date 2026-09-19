@@ -24,6 +24,7 @@ import {
 } from "./profile-lifecycle.js";
 import {
   buildCliUsagePayload,
+  CLI_VERSION,
   cliErrorCode,
   initializeTelemetry,
   readTelemetryStatus,
@@ -58,6 +59,7 @@ import type { PluginRecord } from "@dsh-plugin-hub/schemas";
 const usage = `dsh-hub — DeepSeek Harness plugin and preset client
 
 Usage:
+  dsh-hub --version
   dsh-hub init [directory] --repository <owner/repository> [--name <npm-package>]
   dsh-hub validate [directory] [--json]
   dsh-hub search <query> [--json]
@@ -184,6 +186,10 @@ async function main() {
   // adapter. Validate before telemetry, API requests, filesystem writes or spawn.
   const environment = stripStoredInputEnvironment(process.env);
   for (const key of Object.keys(process.env)) if (!Object.hasOwn(environment, key)) delete process.env[key];
+  if (process.argv.length === 3 && ["--version", "-v"].includes(process.argv[2]!)) {
+    console.log(CLI_VERSION);
+    return;
+  }
   const parsed = parseArgs({
     args: process.argv.slice(2),
     allowPositionals: true,

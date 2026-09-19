@@ -2,6 +2,8 @@
 
 All four `@dsh-plugin-hub/*` packages are released together under one version.
 
+## Unreleased
+
 ## 0.5.0 — 2026-09-18
 
 - Add local Profile inventory, status, fixed-runtime launch and explicit isolated runtime preparation.

@@ -38,7 +38,7 @@ async function fixture(t: test.TestContext) {
   const env = { PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`, HOME: root, DSH_HOME: root,
     DSH_HUB_API_URL: "https://fixture.invalid/api/v1", DSH_HUB_TELEMETRY: "0" };
   await writeFile(events, "");
-  const log = `const fs=require('node:fs'),path=require('node:path');function record(phase,args){fs.appendFileSync(${JSON.stringify(events)},JSON.stringify({phase,value:process.env.${key},orphan:process.env.${orphan},marker:process.env.${marker},args})+'\\n');}`;
+  const log = `const fs=require('node:fs'),path=require('node:path');function record(phase,args){fs.appendFileSync(path.join(process.env.DSH_HOME,'events.jsonl'),JSON.stringify({phase,value:process.env.${key},orphan:process.env.${orphan},marker:process.env.${marker},args})+'\\n');}`;
   await writeFile(wrapper, `import {appendFileSync} from 'node:fs';
 globalThis.fetch=async(url)=>{appendFileSync(${JSON.stringify(join(root, "network.jsonl"))},JSON.stringify({url:String(url)})+'\\n');if(!String(url).endsWith('/packages/resolve?name=boundary-plugin'))throw new Error('Unexpected fixture request');return new Response(${JSON.stringify(JSON.stringify(plugin))},{status:200,headers:{'content-type':'application/json'}});};
 await import(${JSON.stringify(cliUrl)});

@@ -4,6 +4,8 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { deflateRawSync } from "node:zlib";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   dshPackageManifestSchema,
   hubListingSchema,
@@ -45,6 +47,20 @@ import {
   telemetryNotice,
 } from "../dist/telemetry.js";
 import { readProfileArchive, verifyProfileRelease } from "../dist/profile-archive.js";
+
+test("standalone version flags report the installed manifest without changing selector options", async () => {
+  const metadata = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const entry = fileURLToPath(new URL("../dist/bin.js", import.meta.url));
+  for (const flag of ["--version", "-v"]) {
+    const result = spawnSync(process.execPath, [entry, flag], { encoding: "utf8", env: { ...process.env, DSH_HUB_TELEMETRY: "0" } });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), metadata.version);
+  }
+  const help = spawnSync(process.execPath, [entry, "profile", "apply", "example", "--version", "1.2.3", "--help"],
+    { encoding: "utf8", env: { ...process.env, DSH_HUB_TELEMETRY: "0" } });
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, /--version <value>/);
+});
 
 test("creates a complete schema-valid plugin starter without overwriting files", async () => {
   const root = await mkdtemp(join(tmpdir(), "dsh-hub-starter-"));

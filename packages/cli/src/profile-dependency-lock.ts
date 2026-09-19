@@ -137,7 +137,9 @@ function integrity(value: unknown): Integrity {
     const rank = algorithms.indexOf(matched[1]!);
     const digest = Buffer.from(matched[2]!, "base64");
     const canonical = digest.toString("base64");
-    if (digest.length !== lengths[rank] || canonical.replace(/=+$/, "") !== matched[2]!.replace(/=+$/, "")) fail("LOCK_INTEGRITY");
+    // The grammar above allows only trailing padding. Split once instead of
+    // scanning every possible start of an unbounded trailing-padding regex.
+    if (digest.length !== lengths[rank] || canonical.split("=", 1)[0] !== matched[2]!.split("=", 1)[0]) fail("LOCK_INTEGRITY");
     if (matched[2]!.includes("=") && canonical !== matched[2]) fail("LOCK_INTEGRITY");
     const values = byAlgorithm.get(rank) ?? new Set<string>(); values.add(canonical); byAlgorithm.set(rank, values);
     strongest = Math.max(strongest, rank);
