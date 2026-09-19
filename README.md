@@ -6,7 +6,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-**Share your entire DeepSeek Harness setup as one versioned, reproducible Preset.**
+**Share your DeepSeek Harness plugins and configuration as a versioned Profile.**
 
 Capture the plugins, order, runtime, and config you have running locally. Publish it as an immutable Release. Anyone can apply it with a single command, review every change before it lands, and roll back if they don't like it.
 
@@ -67,7 +67,7 @@ flowchart LR
 | Without DSH Hub | With a shared Preset |
 | --- | --- |
 | "Install these six plugins" | One slug and one version |
-| Versions drift within days | Every version, source, and integrity hash is locked |
+| Direct versions drift within days | The Release records exact direct versions and sources |
 | Load order lives in someone's head | Order is part of the Release and validated on apply |
 | Secrets get pasted into docs | Only `${ENV_VAR}` references are published; values stay local |
 | Upgrades are a fresh install | `profile diff` shows exactly what changes before you upgrade |
@@ -166,9 +166,9 @@ dsh-hub install dsh-context --version 1.2.3 --profile web
 
 ## How it works
 
-### Every mutation is a reviewable plan
+### Review a plan before applying it
 
-Nothing that changes your local harness runs immediately. The CLI first writes a **plan**: an exact, expiring description of what will happen, plus a fingerprint of the current state. You apply the plan by ID. If the local Profile changed in between, or 30 minutes passed, the plan is rejected and you make a fresh one.
+Use `--plan` to save a reviewable, expiring description and a fingerprint of the current state. Apply it by ID after review. If the local Profile changed or the plan expired, create a fresh plan. Direct CLI mutation commands execute immediately unless you request `--plan` or `--dry-run`; agent tools use the plan/apply flow.
 
 ```mermaid
 sequenceDiagram
@@ -232,8 +232,17 @@ All four ship in lockstep under one version. See [docs/architecture.md](docs/arc
 | `dsh-hub search <query>` | Search the Plugin catalog |
 | `dsh-hub info <package> [--version]` | Show a plugin's resolved version, source, compatibility, and security assessment |
 | `dsh-hub sync <package>` | Run an immediate npm sync so a just-published Plugin or Preset version is indexed without waiting for the schedule |
-| `dsh-hub install <package> [--version] [--profile]` | Install one plugin into a local Profile |
+| `dsh-hub install <package> [--version] [--profile] [--runtime-version]` | Create or edit a local Profile with exact runtime, staging and history |
+| `dsh-hub runtime prepare --runtime-version <exact>` | Prepare the isolated runtime cache before a read-only local preview |
+| `dsh-hub profile plugin remove\|enable\|disable <package>` | Edit dependency and enabled bundle state transactionally |
+| `dsh-hub profile plugin reorder <package...>` | Set the full enabled bundle sequence |
+| `dsh-hub profile configure --file <patch.yml>` | Validate and apply a local configuration patch |
+| `dsh-hub profile inputs declare\|undeclare <KEY>` | Manage local input declarations, separate from stored values |
 | `dsh-hub profile search <query>` | Search published Presets |
+| `dsh-hub profile list` | List local Profiles without contacting the Hub |
+| `dsh-hub profile status [--profile]` | Inspect source, recorded runtime, drift and history |
+| `dsh-hub profile run [--profile] [--dry-run]` | Start with the recorded exact runtime or preview its command |
+| `dsh-hub profile inputs list\|set\|unset [KEY] [--profile]` | Inspect input readiness or manage local saved values |
 | `dsh-hub profile apply <slug> [--version] [--profile]` | Apply a Preset Release |
 | `dsh-hub profile upgrade [slug] [--version] [--profile]` | Upgrade the installed Preset to another Release |
 | `dsh-hub profile diff [slug] [--version] [--profile]` | Compare local state with a Release |
@@ -253,7 +262,7 @@ Common flags: `--profile <name>` (default `web`), `--version <exact|tag|range>`,
 
 ## Use it from an agent
 
-Install the adapter into a Profile and your DSH agent gets eleven tools that map one-to-one onto the CLI:
+Install the adapter into a Profile to use the CLI through DSH agent tools:
 
 ```bash
 dsh plugin --profile web add @dsh-plugin-hub/dsh-plugin
@@ -268,12 +277,14 @@ The repository also ships a reviewable [`dsh-hub` agent Skill](skills/dsh-hub/SK
 The CLI installs packages, edits local DSH Profiles, and stores a Hub login session. It is built to make each of those inspectable and reversible:
 
 - **Content-addressed Releases.** A Release carries a `sha256` hash. The CLI recomputes it and refuses mismatches.
-- **Pinned sources.** npm bundles carry integrity hashes. GitHub bundles must reference a full commit.
+- **Pinned direct sources.** Releases record direct package versions, source references and available integrity metadata. GitHub references use full commits. Enforcing declared artifact digests and distributing complete transitive dependency locks remain unfinished.
 - **Explicit plans.** Mutations expire after 30 minutes and fail if the local state changed since planning.
 - **Staged apply.** Validation happens in a staging directory. Your live Profile is swapped only after it passes.
 - **Recoverable revisions.** The previous Profile and lockfile are kept intact for rollback.
 - **Secrets stay local.** `profile share` refuses patches containing credential-looking values and publishes only environment-variable references.
 - **Session storage.** Tokens live in `~/.dsh/.hub/auth.json` with mode `0600`. The embedded WorkOS client ID is a public OAuth identifier.
+
+Local management and customization-preserving upgrade commands require CLI 0.5.0 or later. See [CHANGELOG.md](CHANGELOG.md) and the [CLI reference](packages/cli/README.md) for their scope, and [next-stage work](docs/profile-next-stage.md) for remaining reliability and end-to-end validation.
 
 **Telemetry.** After a first-run notice, lifecycle commands send anonymous, aggregate-only usage events (slug, version, outcome, error category, duration, platform, CLI version). No account, machine ID, path, config, or environment value is ever included. Disable it with `dsh-hub telemetry off`, `--no-telemetry`, `DSH_HUB_TELEMETRY=0`, or `DO_NOT_TRACK=1`. Full field list and retention policy: [packages/cli/README.md](packages/cli/README.md#anonymous-cli-telemetry).
 

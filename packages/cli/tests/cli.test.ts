@@ -18,14 +18,13 @@ import {
   parseAllowBuilds,
   profileLockPath,
   rollbackProfile,
-} from "../src/index.ts";
+} from "../dist/index.js";
 import { createPluginStarter } from "../src/scaffold.ts";
 import { validatePackageDirectory } from "../src/package-validation.ts";
 import { HubApiClient } from "../src/api-client.ts";
 import { getAccessToken } from "../dist/auth.js";
 import {
   applyOperationPlan,
-  createPluginInstallPlan,
   createProfileApplyPlan,
   createProfileRollbackPlan,
   createProfileSharePlan,
@@ -126,13 +125,13 @@ test("rejects invalid package and repository identities before creating a starte
 test("builds the official dsh plugin add command without a shell", () => {
   assert.deepEqual(buildDshInstallCommand("web", "dsh-memory@1.2.3"), {
     command: "dsh",
-    args: ["plugin", "--profile", "web", "add", "dsh-memory@1.2.3"],
+    args: ["plugin", "--profile", "web", "add", "--save-exact", "dsh-memory@1.2.3"],
   });
   assert.throws(() => buildDshInstallCommand("../../web", "dsh-memory"));
   assert.throws(() => buildDshInstallCommand("web", "--config=/tmp/x"));
   assert.deepEqual(buildDshInstallCommand("web", "dsh-memory@1.2.3", "0.1.0-rc.7"), {
     command: "npx",
-    args: ["-y", "@deepseek-ai/dsh@0.1.0-rc.7", "plugin", "--profile", "web", "add", "dsh-memory@1.2.3"],
+    args: ["-y", "@deepseek-ai/dsh@0.1.0-rc.7", "plugin", "--profile", "web", "add", "--save-exact", "dsh-memory@1.2.3"],
   });
 });
 
@@ -264,7 +263,11 @@ test("dry-run produces commands without touching the profile", async () => {
     },
   });
 
-  assert.equal(result.commands.length, 1);
+  assert.equal(result.commands.length, 2);
+  assert.equal(result.commands.every(command => command.command === "pnpm"), true);
+  assert.ok(result.commands[0].args.includes("--lockfile-only"));
+  assert.ok(result.commands[0].args.includes("--ignore-scripts"));
+  assert.ok(result.commands[1].args.includes("--frozen-lockfile"));
   await assert.rejects(readFile(profileLockPath("web", root)));
 });
 
@@ -400,8 +403,10 @@ test("captures exact bundle order, installed versions, patch and input candidate
     dependencies: { "@example/memory": "^1.0.0" },
     dsh: { profile: { bundles: ["@deepseek-ai/dsh-base", "@example/memory"] } },
   }), "utf8");
-  await writeFile(join(profile, "node_modules", "@example", "memory", "package.json"), JSON.stringify({ version: "1.4.2" }), "utf8");
+  await writeFile(join(profile, "node_modules", "@example", "memory", "package.json"), JSON.stringify({ name: "@example/memory", version: "1.4.2" }), "utf8");
   await writeFile(join(profile, "cordis.patch.yml"), "apiKeyEnv: DEEPSEEK_API_KEY\n", "utf8");
+  await mkdir(join(root, ".hub", "installations", "web"), { recursive: true });
+  await writeFile(profileLockPath("web", root), JSON.stringify({ schemaVersion: 2, profile: "web", source: "local", runtime: { range: "*", version: "0.1.0" }, bundles: [{ packageName: "@deepseek-ai/dsh-base", version: "0.0.9", sourceKind: "builtin" }] }));
   const draft = await captureProfile({ profile: "web", slug: "my-web", dshHome: root });
   assert.deepEqual(draft.bundles.map((bundle) => bundle.packageName), ["@deepseek-ai/dsh-base", "@example/memory"]);
   assert.equal(draft.bundles[1]?.version, "1.4.2");
@@ -418,8 +423,8 @@ test("captures a pinned GitHub dependency without rewriting it as npm", async ()
     dependencies: { "dsh-better-sidebar": `github:omdsh-dev/DSH-better-sidebar#${commit}` },
     dsh: { profile: { bundles: ["dsh-better-sidebar"] } },
   }), "utf8");
-  await writeFile(join(profile, "node_modules", "dsh-better-sidebar", "package.json"), JSON.stringify({ version: "0.15.0" }), "utf8");
-  const draft = await captureProfile({ profile: "web", slug: "github-web", dshHome: root });
+  await writeFile(join(profile, "node_modules", "dsh-better-sidebar", "package.json"), JSON.stringify({ name: "dsh-better-sidebar", version: "0.15.0" }), "utf8");
+  const draft = await captureProfile({ profile: "web", slug: "github-web", dshHome: root, runtimeVersion: "0.1.0" });
   assert.equal(draft.bundles[0]?.sourceKind, "github");
   assert.equal(draft.bundles[0]?.installSpec, `github:omdsh-dev/DSH-better-sidebar#${commit}`);
   assert.equal(draft.bundles[0]?.version, "0.15.0");
@@ -446,39 +451,17 @@ test("operation plans are persisted, preconditioned and single-use", async () =>
   await assert.rejects(applyOperationPlan({ id: plan.id, dshHome: root }), /applied/);
 });
 
-test("Plugin install plans pin the exact source and carry its security assessment", async () => {
+test("legacy plugin install plans cannot execute the old global mutation path", async () => {
   const root = await mkdtemp(join(tmpdir(), "dsh-hub-plugin-plan-"));
-  const profile = join(root, "profiles", "web");
-  await mkdir(profile, { recursive: true });
-  await writeFile(join(profile, "package.json"), JSON.stringify({ name: "web" }), "utf8");
-  await writeFile(join(profile, "cordis.patch.yml"), "[]\n", "utf8");
-  const plugin = {
-    packageName: "dsh-memory",
-    security: {
-      status: "passed", version: "1.2.3", scannerVersion: "1",
-      integrityVerified: true, staticAnalyzed: true, capabilityAnalyzed: true,
-      dependencyInventoryComplete: true, advisoryScanned: true, behaviorAnalyzed: false,
-      capabilities: {
-        cordisModules: [], cordisServices: [], clientPackages: [], environmentVariables: [], networkHosts: [],
-        dynamicConfig: false, executablePatch: false, filesystemAccess: false, shellExecution: false,
-        registersModelTools: false, sessionAccess: false,
-      },
-      updatedAt: "2026-08-30T00:00:00.000Z",
-    },
-  } as never;
-  const plan = await createPluginInstallPlan({
-    profile: "web", plugin, version: "1.2.3", installSpec: "dsh-memory@1.2.3", dshHome: root,
-  });
-  assert.equal(plan.kind, "plugin.install");
-  assert.equal(plan.input.installSpec, "dsh-memory@1.2.3");
-  assert.equal(plan.input.security?.integrityVerified, true);
-  let installed = "";
-  await applyOperationPlan({
-    id: plan.id,
-    dshHome: root,
-    installPlugin: async (input) => { installed = input.installSpec; },
-  });
-  assert.equal(installed, "dsh-memory@1.2.3");
+  const id = "123e4567-e89b-12d3-a456-426614174000";
+  await mkdir(join(root, ".hub", "operations"), { recursive: true });
+  await writeFile(join(root, ".hub", "operations", `${id}.json`), JSON.stringify({
+    schemaVersion: 1, id, kind: "plugin.install", status: "planned", createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 60_000).toISOString(), precondition: {},
+    input: { profile: "web", packageName: "dsh-memory", version: "1.2.3", installSpec: "dsh-memory@1.2.3" },
+  }));
+  await assert.rejects(applyOperationPlan({ id, dshHome: root,
+    installPlugin: async () => { assert.fail("legacy mutation hook must not execute"); } }), /predates atomic local edits/);
 });
 
 test("Profile diff reports additions, removals, updates, and immutable source changes", () => {
@@ -542,6 +525,8 @@ test("CLI telemetry is anonymous, optional, and reduces errors to stable codes",
   });
   assert.equal(payload?.packageName, "dsh-memory");
   assert.equal(payload?.durationMs, 42);
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  assert.equal(payload?.cliVersion, manifest.version);
   assert.equal("profile" in (payload ?? {}), false);
   assert.equal("path" in (payload ?? {}), false);
 });
@@ -649,9 +634,9 @@ test("share plans bind publication to the captured local Profile", async () => {
     dependencies: { "dsh-memory": "^1.0.0" },
     dsh: { profile: { bundles: ["dsh-memory"] } },
   }), "utf8");
-  await writeFile(join(profile, "node_modules", "dsh-memory", "package.json"), JSON.stringify({ version: "1.4.0" }), "utf8");
+  await writeFile(join(profile, "node_modules", "dsh-memory", "package.json"), JSON.stringify({ name: "dsh-memory", version: "1.4.0" }), "utf8");
   await writeFile(join(profile, "cordis.patch.yml"), "[]\n", "utf8");
-  const draft = await captureProfile({ profile: "web", slug: "research", name: "Research", dshHome: root });
+  const draft = await captureProfile({ profile: "web", slug: "research", name: "Research", dshHome: root, runtimeVersion: "0.1.0-rc.7" });
   draft.runtime = { range: "*", version: "0.1.0-rc.7" };
   const plan = await createProfileSharePlan({
     profile: "web", slug: "research", version: "1.0.0", apiBase: "https://hub.test/api/v1", draft, dshHome: root,

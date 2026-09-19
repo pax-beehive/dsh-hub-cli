@@ -6,7 +6,7 @@
 
 [English](README.md) · **简体中文**
 
-**把你的整套 DeepSeek Harness 配置打包成一个带版本、可复现的环境预设，分享给任何人。**
+**把你的 DeepSeek Harness 插件和配置保存成带版本的 Profile，并分享给其他人。**
 
 捕获本地正在运行的插件、加载顺序、运行时和配置，发布为一个不可变的 Release。其他人一条命令即可应用，落地前可以审阅每一处变更，不满意随时回滚。
 
@@ -34,7 +34,7 @@ npm install --global @dsh-plugin-hub/cli
 dsh-hub profile apply dsh-web-workspace --version 0.1.0 --profile web
 ```
 
-这一条命令会按作者发布时的精确版本、精确顺序和精确 patch 安装插件。不是"今天的 latest 是什么就装什么"，而是作者当时拥有的那一套。
+命令使用 Release 记录的直接插件版本、来源、顺序和 patch。完整传递依赖锁与下载制品摘要的强制验证仍在开发中。文中的 slug、插件名和版本为示例，使用时请替换为实际发布内容。
 
 ## 为什么需要可分享的环境预设
 
@@ -67,7 +67,7 @@ flowchart LR
 | 没有 DSH Hub | 有了共享环境预设 |
 | --- | --- |
 | "把这六个插件装一下" | 一个 slug 加一个版本号 |
-| 几天之内版本就漂移 | 每个版本、来源和完整性哈希都被锁定 |
+| 直接插件版本发生漂移 | Release 记录直接插件的精确版本和来源 |
 | 加载顺序只存在于某人脑子里 | 顺序是 Release 的一部分，应用时会校验 |
 | 密钥被粘贴进文档 | 只发布 `${ENV_VAR}` 引用，真实值留在本地 |
 | 升级等于重装 | `profile diff` 在升级前精确展示会改动什么 |
@@ -166,9 +166,9 @@ dsh-hub install dsh-context --version 1.2.3 --profile web
 
 ## 工作原理
 
-### 每一次变更都是可审阅的计划
+### 先审阅计划，再执行
 
-任何会改动本地 harness 的操作都不会立即执行。CLI 先写一份**计划**：精确描述将要发生什么，带过期时间，并附上当前状态的指纹。你按 ID 应用这份计划。如果这期间本地 Profile 发生了变化，或者已经过了 30 分钟，计划会被拒绝，需要重新生成。
+加上 `--plan` 会保存一份带有效期的计划，描述操作并绑定当前状态的指纹。审阅后按 ID 执行；本地 Profile 改变或计划过期时，需要重新生成。直接 CLI 变更命令默认执行，使用 `--plan` 或 `--dry-run` 才会停在计划或预览阶段；Agent 工具采用计划/执行流程。
 
 ```mermaid
 sequenceDiagram
@@ -232,8 +232,17 @@ flowchart LR
 | `dsh-hub search <query>` | 搜索插件目录 |
 | `dsh-hub info <package> [--version]` | 查看插件解析后的版本、来源、兼容性和安全评估 |
 | `dsh-hub sync <package>` | 立即同步一个 npm 包，让刚发布的插件或环境预设版本不必等定时任务 |
-| `dsh-hub install <package> [--version] [--profile]` | 把单个插件安装到本地 Profile |
+| `dsh-hub install <package> [--version] [--profile] [--runtime-version]` | 使用精确 Runtime 新建或编辑 Profile，保留历史 |
+| `dsh-hub runtime prepare --runtime-version <exact>` | 为本地只读预览准备隔离的精确 Runtime 缓存 |
+| `dsh-hub profile plugin remove\|enable\|disable <package>` | 通过暂存事务管理依赖和启用状态 |
+| `dsh-hub profile plugin reorder <package...>` | 设置完整的已启用插件顺序 |
+| `dsh-hub profile configure --file <patch.yml>` | 验证并应用本地配置文件 |
+| `dsh-hub profile inputs declare\|undeclare <KEY>` | 管理输入声明，保存值独立存储 |
 | `dsh-hub profile search <query>` | 搜索已发布的环境预设 |
+| `dsh-hub profile list` | 列出本地 Profile，不访问 Hub |
+| `dsh-hub profile status [--profile]` | 查看来源、固定 Runtime、文件变化和历史 |
+| `dsh-hub profile run [--profile] [--dry-run]` | 使用记录的精确 Runtime 启动，或预览启动命令 |
+| `dsh-hub profile inputs list\|set\|unset [KEY] [--profile]` | 查看输入准备状态或管理本地保存值 |
 | `dsh-hub profile apply <slug> [--version] [--profile]` | 应用一个环境预设 Release |
 | `dsh-hub profile upgrade [slug] [--version] [--profile]` | 把已安装的环境预设升级到另一个 Release |
 | `dsh-hub profile diff [slug] [--version] [--profile]` | 对比本地状态和某个 Release |
@@ -251,9 +260,13 @@ flowchart LR
 
 常用参数：`--profile <name>`（默认 `web`）、`--version <精确版本|tag|范围>`、`--dry-run`、`--plan`、`--json`、`--no-telemetry`、`--api <url>`。
 
+新建或接管未记录 Runtime 的本地 Profile 时，提供 `--runtime-version <精确版本>`。缓存未准备好时，只读预览给出 `runtime prepare` 指引；实际编辑可准备所选 Runtime。已有作者 Profile 继续使用 Release 固定的版本。本地来源和作者来源分开记录，接入作者或升级时保留个人修改，有冲突则要求选择。配置、额外文件和输入值的保存边界见 [CLI 参考](packages/cli/README.md)。
+
+输入值可在安装前通过 `profile inputs set KEY --profile NAME` 的隐藏终端输入保存；脚本使用 `--stdin`。保存值不进入分享文件或计划。这里的日常管理与保留定制升级需要 CLI 0.5.0 或更高版本，见 [更新记录](CHANGELOG.md)；可靠性补强和完整使用验收见 [下一阶段](docs/profile-next-stage.md)。
+
 ## 在 Agent 中使用
 
-把适配器装进某个 Profile，你的 DSH agent 就获得了 11 个与 CLI 一一对应的工具：
+把适配器装进某个 Profile，即可通过 DSH Agent 工具使用 CLI：
 
 ```bash
 dsh plugin --profile web add @dsh-plugin-hub/dsh-plugin
@@ -268,7 +281,7 @@ dsh plugin --profile web add @dsh-plugin-hub/dsh-plugin
 CLI 会安装软件包、修改本地 DSH Profile，并保存 Hub 登录会话。它的设计目标是让这三件事都可检查、可撤销：
 
 - **按内容寻址的 Release。** 每个 Release 带一个 `sha256` 哈希。CLI 会重新计算并拒绝不匹配的。
-- **固定来源。** npm bundle 带完整性哈希。GitHub bundle 必须引用完整的 commit。
+- **固定直接来源。** Release 记录直接插件版本、来源和可获得的完整性元数据，GitHub 来源固定完整 commit。制品摘要强制验证和完整传递依赖锁仍待补齐。
 - **显式计划。** 变更操作 30 分钟后过期；如果本地状态在计划生成后发生了变化，则执行失败。
 - **暂存应用。** 校验在暂存目录中进行。只有通过之后才会切换你正在使用的 Profile。
 - **可恢复的版本。** 上一个 Profile 和 lockfile 会完整保留，供回滚使用。

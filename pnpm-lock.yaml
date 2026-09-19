@@ -50,10 +50,19 @@ importers:
       '@dsh-plugin-hub/schemas':
         specifier: workspace:*
         version: link:../schemas
+      semver:
+        specifier: 'catalog:'
+        version: 7.8.5
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.1
+      '@types/semver':
+        specifier: 'catalog:'
+        version: 7.8.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -243,6 +252,11 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   zod@4.5.2:
     resolution: {integrity: sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg==}
 
@@ -370,5 +384,7 @@ snapshots:
   typescript@5.9.3: {}
 
   undici-types@6.21.0: {}
+
+  yaml@2.9.1: {}
 
   zod@4.5.2: {}

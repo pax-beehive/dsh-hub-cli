@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dshHomePath } from "./index.js";
 
-export const CLI_VERSION = "0.2.0";
+// The published manifest is the version authority for the CLI and its worker.
+export const CLI_VERSION: string = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 export const TELEMETRY_RETENTION_DAYS = 365;
 
 export type CliUsageEvent =
