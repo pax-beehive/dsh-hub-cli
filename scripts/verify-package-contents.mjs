@@ -6,7 +6,9 @@ import { join } from "node:path";
 const packages = ["schemas", "registry", "cli", "dsh-plugin"];
 const forbidden = /(^|\/)(\.env(?:\.|$)|node_modules|src|tests)(\/|$)/;
 const packageRequirements = {
-  cli: ["dist/bin.js", "dist/telemetry.js", "dist/telemetry-worker.js"],
+  cli: ["dist/bin.js", "dist/telemetry.js", "dist/telemetry-worker.js", "dist/runtime-launch.js",
+    "dist/profile-inputs.js", "dist/profile-runtime.js", "dist/profile-edit.js", "dist/profile-upgrade.js", "dist/profile-lifecycle.js", "dist/operations.js",
+    "dist/profile-package-manager.js", "dist/profile-dependency-lock.js", "dist/profile-dependency-install.js"],
 };
 const npmCache = mkdtempSync(join(tmpdir(), "dsh-hub-npm-cache-"));
 

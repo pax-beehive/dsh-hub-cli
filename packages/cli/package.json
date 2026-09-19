@@ -1,8 +1,14 @@
 {
   "name": "@dsh-plugin-hub/cli",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Create, search, install, and apply versioned DeepSeek Harness plugins and profiles",
-  "keywords": ["dsh-plugin", "deepseek-harness", "profile", "cli", "rollback"],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "profile",
+    "cli",
+    "rollback"
+  ],
   "homepage": "https://dshpluginhub.ai",
   "repository": {
     "type": "git",
@@ -13,7 +19,11 @@
     "url": "https://github.com/pax-beehive/dsh-hub-cli/issues"
   },
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
@@ -32,10 +42,13 @@
   },
   "dependencies": {
     "@dsh-plugin-hub/registry": "workspace:*",
-    "@dsh-plugin-hub/schemas": "workspace:*"
+    "@dsh-plugin-hub/schemas": "workspace:*",
+    "semver": "catalog:",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/semver": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
